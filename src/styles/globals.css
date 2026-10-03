@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--fonte-sans), system-ui, sans-serif;
+  --font-display: var(--fonte-display), var(--fonte-sans), system-ui, sans-serif;
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brasa: var(--brasa);
+  --color-brasa-hover: var(--brasa-hover);
+  --color-brasa-soft: var(--brasa-soft);
+  --color-on-brasa: var(--on-brasa);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-alerta: var(--alerta);
+  --color-alerta-soft: var(--alerta-soft);
+  --color-critico: var(--critico);
+  --color-critico-soft: var(--critico-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-neutro: var(--neutro);
+  --color-neutro-soft: var(--neutro-soft);
+  --color-focus: var(--focus);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --text-numero-xl: 56px;
+  --text-numero-xl--line-height: 56px;
+  --text-numero-xl--font-weight: 700;
+  --text-numero-xl--letter-spacing: -0.02em;
+  --text-numero-lg: 32px;
+  --text-numero-lg--line-height: 36px;
+  --text-numero-lg--font-weight: 700;
+  --text-numero-lg--letter-spacing: -0.01em;
+  --text-display: 30px;
+  --text-display--line-height: 36px;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.01em;
+  --text-titulo: 22px;
+  --text-titulo--line-height: 28px;
+  --text-titulo--font-weight: 650;
+  --text-corpo-lg: 17px;
+  --text-corpo-lg--line-height: 24px;
+  --text-corpo-lg--font-weight: 500;
+  --text-corpo: 16px;
+  --text-corpo--line-height: 24px;
+  --text-corpo--font-weight: 400;
+  --text-rotulo: 14px;
+  --text-rotulo--line-height: 20px;
+  --text-rotulo--font-weight: 600;
+  --text-legenda: 13px;
+  --text-legenda--line-height: 18px;
+  --text-legenda--font-weight: 500;
+
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1100px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--fonte-sans), system-ui, sans-serif;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
 }

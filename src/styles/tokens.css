@@ -1,0 +1,106 @@
+/* Tokens do design system do Expresso café (gerado de tokens.json). */
+/* Tema claro é o padrão; o escuro segue o sistema ou data-theme="dark" no <html>. */
+
+:root {
+    color-scheme: light;
+    --surface: #f6f2eb;
+    --surface-raised: #ffffff;
+    --surface-sunken: #ece5d9;
+    --line: #e0d6c6;
+    --line-strong: #8a7c6b;
+    --ink: #1f1812;
+    --ink-muted: #625547;
+    --brasa: #b5441a;
+    --brasa-hover: #983714;
+    --brasa-soft: #fbe6da;
+    --on-brasa: #ffffff;
+    --ok: #0b6670;
+    --ok-soft: #d8eef0;
+    --alerta: #8a5300;
+    --alerta-soft: #fcefcf;
+    --critico: #a32117;
+    --critico-soft: #fbe2df;
+    --info: #1e5b94;
+    --info-soft: #deebf8;
+    --neutro: #5d5a55;
+    --neutro-soft: #ebe8e3;
+    --focus: var(--brasa);
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    --toque-min: 48px;
+    --controle: 56px;
+    --fab: 64px;
+    --barra-inferior: 72px;
+    --coluna-max: 480px;
+    --shadow-card: 0 1px 2px #1f18120d, 0 1px 3px #1f181214;
+    --shadow-float: 0 -2px 12px #1f18121a, 0 8px 24px #1f181226;
+    --focus-ring: 0 0 0 2px #f6f2eb, 0 0 0 4px #b5441a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --surface: #17130f;
+        --surface-raised: #221c17;
+        --surface-sunken: #100d0a;
+        --line: #362d25;
+        --line-strong: #85776a;
+        --ink: #f4ede4;
+        --ink-muted: #b9ab9b;
+        --brasa: #f08a52;
+        --brasa-hover: #f5a476;
+        --brasa-soft: #3d1d0e;
+        --on-brasa: #1a120c;
+        --ok: #5ec4cc;
+        --ok-soft: #0c2b2e;
+        --alerta: #f2b84b;
+        --alerta-soft: #3a2a08;
+        --critico: #f28a80;
+        --critico-soft: #3d1512;
+        --info: #82b6ea;
+        --info-soft: #10253b;
+        --neutro: #aaa49c;
+        --neutro-soft: #2b2621;
+        --shadow-card: 0 1px 2px #00000080;
+        --shadow-float: 0 -2px 12px #00000099, 0 8px 24px #000000b3;
+        --focus-ring: 0 0 0 2px #17130f, 0 0 0 4px #f08a52;
+    }
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #17130f;
+    --surface-raised: #221c17;
+    --surface-sunken: #100d0a;
+    --line: #362d25;
+    --line-strong: #85776a;
+    --ink: #f4ede4;
+    --ink-muted: #b9ab9b;
+    --brasa: #f08a52;
+    --brasa-hover: #f5a476;
+    --brasa-soft: #3d1d0e;
+    --on-brasa: #1a120c;
+    --ok: #5ec4cc;
+    --ok-soft: #0c2b2e;
+    --alerta: #f2b84b;
+    --alerta-soft: #3a2a08;
+    --critico: #f28a80;
+    --critico-soft: #3d1512;
+    --info: #82b6ea;
+    --info-soft: #10253b;
+    --neutro: #aaa49c;
+    --neutro-soft: #2b2621;
+    --shadow-card: 0 1px 2px #00000080;
+    --shadow-float: 0 -2px 12px #00000099, 0 8px 24px #000000b3;
+    --focus-ring: 0 0 0 2px #17130f, 0 0 0 4px #f08a52;
+}
