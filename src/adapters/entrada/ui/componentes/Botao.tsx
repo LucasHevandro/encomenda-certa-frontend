@@ -21,7 +21,7 @@ export interface EstiloBotao {
 /** Classes do botão, para usar também em links que parecem botão. */
 export function classesBotao({ variante = "primario", tamanho = "lg", bloco }: EstiloBotao, extra?: string) {
   return cx(
-    "cursor-pointer items-center justify-center gap-2 rounded-md border-[1.5px] border-transparent font-semibold transition-colors duration-[120ms]",
+    "cursor-pointer items-center justify-center gap-2 rounded-md border-[1.5px] border-transparent font-semibold whitespace-nowrap transition-colors duration-[120ms]",
     "disabled:cursor-not-allowed disabled:opacity-45",
     tamanho === "lg" ? "min-h-14 px-5 text-[17px]" : "min-h-12 px-4 text-corpo",
     bloco ? "flex w-full" : "inline-flex",

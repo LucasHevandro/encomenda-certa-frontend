@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { ProvedorDependencias } from "@/config/ProvedorDependencias";
 import "../styles/tokens.css";
 import "../styles/globals.css";
 
@@ -14,7 +15,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${sans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-surface text-ink">{children}</body>
+      <body className="flex min-h-full flex-col bg-surface font-sans text-ink">
+        <ProvedorDependencias>{children}</ProvedorDependencias>
+      </body>
     </html>
   );
 }

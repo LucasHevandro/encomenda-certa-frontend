@@ -16,7 +16,7 @@ describe("formatos do balcão", () => {
     expect(dinheiro(centavos(15700))).toBe("R$ 157,00");
     expect(dinheiro(centavos(19990))).toBe("R$ 199,90");
     expect(dinheiroCurto(centavos(234000))).toBe("R$ 2.340");
-    expect(dinheiroCurto(centavos(19990))).toBe("R$ 199,90");
+    expect(dinheiroCurto(centavos(127390))).toBe("R$ 1.274");
   });
 
   it("número do pedido com quatro dígitos", () => {

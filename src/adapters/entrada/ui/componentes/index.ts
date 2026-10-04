@@ -11,6 +11,7 @@ export { CartaoProduto, estadoDisponibilidade } from "./CartaoProduto";
 export { Confirmacao } from "./Confirmacao";
 export { Carregando, FalhaAoCarregar, Pagina, Secao, Vazio } from "./Estados";
 export { Filtros, type OpcaoFiltro } from "./Filtros";
+export { Folha } from "./Folha";
 export { Icone, type NomeIcone } from "./Icone";
 export { GrupoLista, ItemLista } from "./ItemLista";
 export { LinkBotao } from "./LinkBotao";

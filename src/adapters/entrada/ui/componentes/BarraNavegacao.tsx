@@ -35,7 +35,7 @@ export function BarraNavegacao({
         "desktop:inset-y-0 desktop:right-auto desktop:flex desktop:w-60 desktop:flex-col desktop:items-stretch desktop:gap-1 desktop:border-t-0 desktop:border-r desktop:px-3 desktop:pt-6 desktop:shadow-none",
       )}
     >
-      <p className="hidden px-3 pb-4 font-display text-titulo desktop:block">Expresso café</p>
+      <p className="hidden px-3 pb-4 font-display text-titulo desktop:order-[-2] desktop:block">Expresso café</p>
       {ITENS.map((item) => {
         const marcado = item.id === ativo;
         const fab = item.id === "novo";
@@ -43,7 +43,7 @@ export function BarraNavegacao({
           "flex min-h-12 cursor-pointer flex-col items-center gap-0.5 rounded-md border-0 bg-transparent pt-1.5 text-ink-muted",
           "desktop:flex-row desktop:gap-3 desktop:px-3 desktop:py-2",
           marcado && "text-brasa",
-          fab && "text-ink desktop:order-first desktop:mb-3 desktop:bg-brasa desktop:text-on-brasa",
+          fab && "text-ink desktop:order-[-1] desktop:mb-3 desktop:bg-brasa desktop:text-on-brasa",
         );
         const icone = (
           <span

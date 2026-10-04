@@ -9,7 +9,7 @@ import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway"
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import { type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
-import { type DiaVenda, estaAberto as diaAberto } from "@/core/domain/dia-venda/DiaVenda";
+import { type DiaVenda, estaAberto as diaAberto, validarNovaData } from "@/core/domain/dia-venda/DiaVenda";
 import { disponiveis, type ItemSolicitado, verificarItens } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import { estaAberto, type ItemPedido, type Pagamento, type Pedido, totalDoPedido } from "@/core/domain/pedido/Pedido";
@@ -72,9 +72,10 @@ export class DiasEmMemoria implements DiasGateway {
 
   async abrir(comando: AbrirDia): Promise<DiaVenda> {
     await this.banco.esperar();
-    if (this.banco.dias.some((d) => d.data === comando.data)) {
-      throw new ErroDeDominio("dia-ja-existe", "Já existe um dia de venda nessa data.");
-    }
+    validarNovaData(
+      comando.data,
+      this.banco.dias.map((d) => d.data),
+    );
     const dia: DiaVenda = { id: comando.data, data: comando.data, status: "aberto" };
     this.banco.dias.push(dia);
     this.banco.producao.set(dia.id, new Map(comando.producao.map((p) => [p.produtoId, p.quantidade])));
@@ -310,6 +311,18 @@ export class EsperaEmMemoria implements EsperaGateway {
     const naFila = this.banco.espera.filter((e) => e.diaId === entrada.diaId && e.produtoId === entrada.produtoId);
     const nova: EntradaEspera = { ...entrada, id: crypto.randomUUID(), posicao: naFila.length + 1, status: "aguardando" };
     this.banco.espera.push(nova);
+    this.banco.emitir(entrada.diaId, { tipo: "disponibilidade-mudou" });
+    return nova;
+  }
+
+  async mudarStatus(entradaId: string, status: EntradaEspera["status"]): Promise<EntradaEspera> {
+    await this.banco.esperar();
+    const atual = this.banco.espera.find((e) => e.id === entradaId);
+    if (!atual) throw naoEncontrado("Cliente na lista de espera");
+    diaParaEscrita(this.banco, atual.diaId);
+    const nova = { ...atual, status };
+    this.banco.espera = this.banco.espera.map((e) => (e.id === entradaId ? nova : e));
+    this.banco.emitir(atual.diaId, { tipo: "disponibilidade-mudou" });
     return nova;
   }
 }

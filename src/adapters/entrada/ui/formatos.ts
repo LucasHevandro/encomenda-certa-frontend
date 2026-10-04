@@ -13,9 +13,9 @@ export function dinheiro(valor: Dinheiro): string {
   return espacoComum(reais.format(valor / 100));
 }
 
-/** "R$ 2.340" para números do resumo; mantém os centavos quando existem. */
+/** "R$ 2.340" para números grandes do resumo, arredondado para o real mais próximo. */
 export function dinheiroCurto(valor: Dinheiro): string {
-  return valor % 100 === 0 ? espacoComum(reaisSemCentavos.format(valor / 100)) : dinheiro(valor);
+  return espacoComum(reaisSemCentavos.format(Math.round(valor / 100)));
 }
 
 /** "#0258". */
@@ -44,6 +44,13 @@ export function dataIso(data: Date): string {
 /** "Domingo". */
 export function diaDaSemana(iso: string): string {
   return DIAS_SEMANA[lerData(iso).getDay()];
+}
+
+/** Sobretítulo do Início: "Hoje", "Próximo domingo" ou só o dia da semana se já passou. */
+export function rotuloDoDia(iso: string, hoje: string = dataIso(new Date())): string {
+  if (iso === hoje) return "Hoje";
+  const semana = diaDaSemana(iso).toLowerCase();
+  return iso > hoje ? `Próximo ${semana}` : diaDaSemana(iso);
 }
 
 /** "Domingo, 04/10", para listas. */
