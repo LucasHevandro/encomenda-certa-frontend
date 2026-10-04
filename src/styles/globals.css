@@ -62,6 +62,11 @@
 
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1100px;
+
+  /* Nomes diferentes dos tokens para a variável não apontar para ela mesma. */
+  --shadow-cartao: var(--shadow-card);
+  --shadow-flutuante: var(--shadow-float);
+  --container-coluna: 480px;
 }
 
 @layer base {
@@ -75,4 +80,18 @@
     outline: none;
     box-shadow: var(--focus-ring);
   }
+}
+
+/* A folha de Confirmacao sobe do rodapé; o resto não anima. */
+@keyframes subir {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.folha-subindo {
+  animation: subir 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folha-subindo { animation: none; }
 }

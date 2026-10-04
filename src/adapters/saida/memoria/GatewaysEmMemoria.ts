@@ -10,7 +10,7 @@ import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGat
 import { type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
 import { type DiaVenda, estaAberto as diaAberto } from "@/core/domain/dia-venda/DiaVenda";
-import { comprometidos, disponiveis, type ItemSolicitado, verificarItens } from "@/core/domain/disponibilidade/Disponibilidade";
+import { disponiveis, type ItemSolicitado, verificarItens } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import { estaAberto, type ItemPedido, type Pagamento, type Pedido, totalDoPedido } from "@/core/domain/pedido/Pedido";
 import { validarNovaProducao } from "@/core/domain/producao/Producao";
