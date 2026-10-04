@@ -148,7 +148,12 @@ export class PedidosEmMemoria implements PedidosGateway {
       reservados: e.reservados - atual.itens.filter((i) => i.produtoId === e.produtoId).reduce((t, i) => t + i.quantidade, 0),
     }));
     verificarItens(estoques, itens);
-    return this.substituir({ ...atual, itens: this.montarItens(itens) });
+    // Quem já estava no pedido mantém o preço da época.
+    const novos = this.montarItens(itens).map((item) => {
+      const antigo = atual.itens.find((i) => i.produtoId === item.produtoId);
+      return antigo ? { ...item, precoUnitario: antigo.precoUnitario } : item;
+    });
+    return this.substituir({ ...atual, itens: novos });
   }
 
   async marcarRetirado(pedidoId: string): Promise<Pedido> {

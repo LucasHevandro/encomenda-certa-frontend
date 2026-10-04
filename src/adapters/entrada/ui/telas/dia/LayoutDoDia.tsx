@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, useCallback, useState } from "react";
 import type { EventoDoDia } from "@/core/application/portas/EventosTempoReal";
 import { Aviso, BarraNavegacao, Botao, type ItemNavegacao, LinkBotao } from "../../componentes";
+import { quantidadeDe } from "../../formatos";
 import { usePainel } from "../../hooks/consultas";
 import { useConexao } from "../../hooks/useConexao";
 import { useTempoReal } from "../../hooks/useTempoReal";
@@ -23,16 +24,21 @@ export function LayoutDoDia({ diaId, children }: { diaId: string; children: Reac
   const caminho = usePathname();
   const online = useConexao();
   const [menuAberto, setMenuAberto] = useState(false);
-  const [liberadas, setLiberadas] = useState<{ produtoId: string; quantidade: number } | null>(null);
+  /** produtoId → unidades liberadas desde o último "Fechar". Um cancelamento pode liberar vários produtos. */
+  const [liberadas, setLiberadas] = useState<Record<string, number>>({});
   const { data: painel } = usePainel(diaId);
 
   const aoReceber = useCallback((evento: EventoDoDia) => {
-    if (evento.tipo === "unidades-liberadas") setLiberadas(evento);
+    if (evento.tipo !== "unidades-liberadas") return;
+    setLiberadas((atual) => ({ ...atual, [evento.produtoId]: (atual[evento.produtoId] ?? 0) + evento.quantidade }));
   }, []);
   useTempoReal(diaId, aoReceber);
 
-  const produto = liberadas && painel?.estoques.find((e) => e.produtoId === liberadas.produtoId);
-  const aguardando = liberadas ? (painel?.clientesAguardando[liberadas.produtoId] ?? 0) : 0;
+  const nomeDe = (produtoId: string) => painel?.estoques.find((e) => e.produtoId === produtoId)?.nome ?? produtoId;
+  const produtosLiberados = Object.keys(liberadas);
+  const totalLiberado = Object.values(liberadas).reduce((t, n) => t + n, 0);
+  const comFila = produtosLiberados.filter((id) => (painel?.clientesAguardando[id] ?? 0) > 0);
+  const fechar = () => setLiberadas({});
 
   return (
     <div className="flex min-h-dvh flex-col pb-28 desktop:pb-0 desktop:pl-60">
@@ -41,26 +47,26 @@ export function LayoutDoDia({ diaId, children }: { diaId: string; children: Reac
           Sem conexão. Reservas e alterações ficam travadas até a internet voltar.
         </div>
       )}
-      {liberadas && produto && (
+      {totalLiberado > 0 && (
         <div className="mx-auto w-full max-w-coluna px-4 pt-4 tablet:max-w-2xl tablet:px-6">
           <Aviso
             tom="info"
-            titulo={`${liberadas.quantidade} ${liberadas.quantidade === 1 ? "unidade foi liberada" : "unidades foram liberadas"}`}
+            titulo={totalLiberado === 1 ? "1 unidade foi liberada" : `${totalLiberado} unidades foram liberadas`}
             acoes={
               <>
-                {aguardando > 0 && (
-                  <LinkBotao href={`${base}/espera`} tamanho="md" onClick={() => setLiberadas(null)}>
+                {comFila.length > 0 && (
+                  <LinkBotao href={`${base}/espera`} tamanho="md" onClick={fechar}>
                     Ver lista de espera
                   </LinkBotao>
                 )}
-                <Botao variante="fantasma" tamanho="md" onClick={() => setLiberadas(null)}>
+                <Botao variante="fantasma" tamanho="md" onClick={fechar}>
                   Fechar
                 </Botao>
               </>
             }
           >
-            {produto.nome} voltou a ter unidades para vender.
-            {aguardando > 0 && ` Existem ${aguardando === 1 ? "1 cliente aguardando" : `${aguardando} clientes aguardando`} este produto.`}
+            {produtosLiberados.map((id) => quantidadeDe(liberadas[id], nomeDe(id).toLowerCase())).join(" e ")} de volta para venda.
+            {comFila.length > 0 && ` Existem clientes aguardando ${comFila.map(nomeDe).join(" e ")}.`}
           </Aviso>
         </div>
       )}
