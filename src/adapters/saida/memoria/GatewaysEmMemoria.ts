@@ -243,12 +243,17 @@ export class ProducaoEmMemoria implements ProducaoGateway {
     // Confere tudo antes de gravar qualquer coisa, como numa transação.
     for (const { produtoId, quantidade } of quantidades) {
       const estoque = estoques.find((e) => e.produtoId === produtoId);
-      if (!estoque) throw naoEncontrado("Produto do dia");
-      validarNovaProducao(estoque, quantidade);
+      if (estoque) {
+        validarNovaProducao(estoque, quantidade);
+      } else if (!this.banco.produtos.some((p) => p.id === produtoId)) {
+        throw naoEncontrado("Produto");
+      }
     }
-    const doDia = this.banco.producao.get(diaId)!;
+    const doDia = this.banco.producao.get(diaId) ?? new Map<string, number>();
+    this.banco.producao.set(diaId, doDia);
     for (const { produtoId, quantidade } of quantidades) {
-      const de = doDia.get(produtoId)!;
+      // Produto que ainda não estava no dia entra com produção zero.
+      const de = doDia.get(produtoId) ?? 0;
       if (de === quantidade) continue;
       doDia.set(produtoId, quantidade);
       this.banco.alteracoes.push({ diaId, produtoId, de, para: quantidade, em: new Date().toISOString(), usuario: this.usuario });
