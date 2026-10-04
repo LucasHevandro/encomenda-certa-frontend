@@ -4,6 +4,7 @@ import {
   dataLonga,
   dinheiro,
   dinheiroCurto,
+  lerDinheiro,
   numeroPedido,
   plural,
   quantidadeDe,
@@ -17,6 +18,14 @@ describe("formatos do balcão", () => {
     expect(dinheiro(centavos(19990))).toBe("R$ 199,90");
     expect(dinheiroCurto(centavos(234000))).toBe("R$ 2.340");
     expect(dinheiroCurto(centavos(127390))).toBe("R$ 1.274");
+  });
+
+  it("lê o preço digitado em centavos", () => {
+    expect(lerDinheiro("55")).toBe(5500);
+    expect(lerDinheiro("89,9")).toBe(8990);
+    expect(lerDinheiro("R$ 1.234,50")).toBe(123450);
+    expect(lerDinheiro("abc")).toBeNull();
+    expect(lerDinheiro("")).toBeNull();
   });
 
   it("número do pedido com quatro dígitos", () => {

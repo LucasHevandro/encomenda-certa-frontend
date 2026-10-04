@@ -18,6 +18,18 @@ export function dinheiroCurto(valor: Dinheiro): string {
   return espacoComum(reaisSemCentavos.format(Math.round(valor / 100)));
 }
 
+/** Lê o que a pessoa digitou ("55", "55,9", "R$ 1.234,50") em centavos; null se não for um valor. */
+export function lerDinheiro(texto: string): number | null {
+  const limpo = texto.replace(/R\$|\s/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".");
+  if (!/^\d+(\.\d{1,2})?$/.test(limpo)) return null;
+  return Math.round(Number(limpo) * 100);
+}
+
+/** "55,00" para preencher um campo de preço. */
+export function dinheiroParaCampo(centavos: number): string {
+  return (centavos / 100).toFixed(2).replace(".", ",");
+}
+
 /** "#0258". */
 export function numeroPedido(numero: number): string {
   return `#${String(numero).padStart(4, "0")}`;
