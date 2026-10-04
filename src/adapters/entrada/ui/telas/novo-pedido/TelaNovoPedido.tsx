@@ -22,7 +22,7 @@ import {
 } from "../../componentes";
 import { codigoDoErro, mensagemDeErro } from "../../erros";
 import { dataCurta, dataLonga, dinheiro, quantidadeDe } from "../../formatos";
-import { useAdicionarNaEspera, useCriarPedido } from "../../hooks/acoes";
+import { useAdicionarNaEspera, useCriarPedido, useMudarEspera } from "../../hooks/acoes";
 import { useClientePorTelefone, usePainel, useProdutos } from "../../hooks/consultas";
 import { useConexao } from "../../hooks/useConexao";
 import { AvisoIndisponivel } from "./AvisoIndisponivel";
@@ -31,14 +31,23 @@ import { SeletorItens } from "./SeletorItens";
 import { TelaReservaRealizada } from "./TelaReservaRealizada";
 
 /** Um pedido nasce com nome, produtos e um toque em "Confirmar reserva". Só o nome é obrigatório. */
-export function TelaNovoPedido({ diaId }: { diaId: string }) {
+export function TelaNovoPedido({
+  diaId,
+  inicial,
+}: {
+  diaId: string;
+  /** Preenchido quando vem da lista de espera; ao reservar, a entrada vira "atendido". */
+  inicial?: { nome: string; telefone: string; quantidades: Record<string, number>; esperaId?: string };
+}) {
   const painel = usePainel(diaId);
   const produtos = useProdutos();
   const online = useConexao();
+  const mudarEspera = useMudarEspera(diaId);
 
-  const [telefone, setTelefone] = useState("");
-  const [nome, setNome] = useState("");
-  const [quantidades, setQuantidades] = useState<Record<string, number>>({});
+  const [telefone, setTelefone] = useState(inicial?.telefone ?? "");
+  const [nome, setNome] = useState(inicial?.nome ?? "");
+  const [quantidades, setQuantidades] = useState<Record<string, number>>(inicial?.quantidades ?? {});
+  const [esperaId, setEsperaId] = useState(inicial?.esperaId);
   const [excesso, setExcesso] = useState<ExcessoPedido | null>(null);
   const [naEspera, setNaEspera] = useState<string | null>(null);
   const [criado, setCriado] = useState<Pedido | null>(null);
@@ -112,7 +121,13 @@ export function TelaNovoPedido({ diaId }: { diaId: string }) {
         itens: ativos.map((e) => ({ produtoId: e.produtoId, quantidade: finais[e.produtoId] ?? 0 })),
       },
       {
-        onSuccess: (pedido) => setCriado(pedido),
+        onSuccess: (pedido) => {
+          setCriado(pedido);
+          if (esperaId) {
+            mudarEspera.mutate({ entradaId: esperaId, status: "atendido" });
+            setEsperaId(undefined);
+          }
+        },
         onError: (erro) => {
           if (erro instanceof QuantidadeIndisponivel) {
             setExcesso({ produtoId: erro.produtoId, nome: erro.nome, solicitado: erro.solicitado, maximo: erro.maximo });

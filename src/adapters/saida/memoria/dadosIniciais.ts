@@ -1,4 +1,5 @@
 import { centavos } from "@/core/domain/compartilhado/Dinheiro";
+import { calcularFechamento } from "@/core/domain/fechamento/Fechamento";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
 import { BancoEmMemoria } from "./BancoEmMemoria";
 
@@ -19,7 +20,6 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
   banco.producao.set("2026-10-04", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-10-11", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-09-27", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
-  banco.fechamentos.set("2026-09-27", { faturamento: centavos(351230), sobras: 4 });
 
   banco.clientes = [
     { id: "c1", nome: "João da Silva", telefone: "44999999999", pedidosAnteriores: 12 },
@@ -54,6 +54,27 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
     pedido(258, "João da Silva", [item("frango", 2), item("costela", 1)]),
     pedido(259, "Lúcia Ramos", [item("pernil", 9), item("maionese", 4)]),
   ];
+
+  // Domingo anterior, já fechado: pedidos variados e o fechamento calculado a partir deles.
+  const nomes = ["João da Silva", "Maria Oliveira", "Carlos Souza", "Pedro Alves", "Ana Lima", "Rita Melo"];
+  for (let i = 0; i < 24; i++) {
+    const itens = [item("frango", 1 + (i % 3)), ...(i % 2 ? [item("maionese", 1)] : []), ...(i % 4 === 0 ? [item("costela", 1)] : [])];
+    if (i % 6 === 5) itens.push(item("pernil", 2));
+    banco.pedidos.push(
+      pedido(230 + i, nomes[i % nomes.length], itens, {
+        id: `a${230 + i}`,
+        diaId: "2026-09-27",
+        retirada: i === 23 ? "reservado" : "retirado",
+        pagamento: i === 23 ? "pendente" : i % 2 ? "pix" : "dinheiro",
+      }),
+    );
+  }
+  const anterior = calcularFechamento(
+    banco.estoques("2026-09-27"),
+    banco.pedidos.filter((p) => p.diaId === "2026-09-27"),
+  );
+  banco.fechamentos.set("2026-09-27", { faturamento: anterior.totalVendido, sobras: anterior.sobras });
+
   banco.proximoNumero = 260;
 
   banco.espera = [
