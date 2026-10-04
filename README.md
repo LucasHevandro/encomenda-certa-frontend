@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Expresso café — frontend
 
-## Getting Started
+Pedidos e produção dos assados, num lugar só. Next.js 16 (App Router), React 19, Tailwind 4, TanStack Query e Vitest, em arquitetura hexagonal.
 
-First, run the development server:
+## Rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000 e entre com qualquer e-mail e senha. Sem `NEXT_PUBLIC_API_URL`, o app usa os **adaptadores em memória** com dados de exemplo; recarregar a página volta aos dados iniciais.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm test      # Vitest: domínio, casos de uso, adaptadores e componentes
+pnpm build     # build de produção, com o service worker (PWA)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Ligar na API
 
-## Learn More
+Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_API_URL`. O `src/config/container.ts` passa a usar os gateways HTTP (`adapters/saida/http`) e o tempo real por SSE (`adapters/saida/tempo-real`). Para ligar uma porta de cada vez, troque só ela no container.
 
-To learn more about Next.js, take a look at the following resources:
+O que o front espera da API:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Cookie de sessão httpOnly com o nome de `NEXT_PUBLIC_COOKIE_SESSAO` e `Domain=.seudominio.com`, para o `src/proxy.ts` enxergar.
+- Erros como `{ codigo, mensagem, ...detalhes }`. O 409 `quantidade-indisponivel` traz `produtoId`, `nome`, `solicitado` e `maximo`, que vira o botão "Reservar N".
+- Dinheiro sempre em centavos (inteiro).
+- `GET /dias/:id/eventos` (SSE) com os eventos `disponibilidade-mudou` e `unidades-liberadas` (`{ produtoId, quantidade }`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+As rotas estão em `src/adapters/saida/http/GatewaysHttp.ts`, uma classe por porta.
 
-## Deploy on Vercel
+## Estrutura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/                      # rotas do Next: só renderizam uma tela
+│   ├── (publico)/entrar      # login
+│   ├── (app)/dias/[diaId]/…  # tudo de um dia: início, pedidos, produção, espera, fechamento
+│   ├── (app)/(gestao)/…      # dias de venda, novo dia, produtos, clientes
+│   ├── manifest.ts · icon.tsx · sw.ts · serwist/   # PWA
+│   └── offline/
+├── core/                     # regras e casos de uso, sem React, Next ou fetch
+│   ├── domain/
+│   └── application/{portas,casos-de-uso}/
+├── adapters/
+│   ├── entrada/ui/           # componentes do design system, telas e hooks (TanStack Query)
+│   └── saida/                # memoria, http, tempo-real (SSE), whatsapp (wa.me)
+├── config/                   # container (escolhe os adaptadores) e ProvedorDependencias
+└── proxy.ts                  # sem cookie de sessão → /entrar
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+As dependências só apontam para dentro: `app` → `adapters/entrada/ui` → `core`; `adapters/saida` → `core/application/portas`. O ESLint impede o `core` de importar React, Next ou adaptadores.
+
+O app é só online: sem internet, aparece "Sem conexão" e reservar e alterar ficam travados. O service worker guarda só a casca do app, nunca dados da API.

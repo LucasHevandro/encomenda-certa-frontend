@@ -61,7 +61,7 @@ export function TelaInicio({ diaId }: { diaId: string }) {
               Trocar dia
             </LinkBotao>
             {aberto && (
-              <span className="hidden tablet:contents">
+              <span className="hidden tablet:contents desktop:hidden">
                 <LinkBotao href={`${base}/pedidos/novo`} variante="primario" tamanho="md" icone="mais">
                   Novo pedido
                 </LinkBotao>

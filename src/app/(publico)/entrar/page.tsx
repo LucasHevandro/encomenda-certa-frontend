@@ -1,1 +1,9 @@
-export default function Page() { return null; }
+import type { Metadata } from "next";
+import { TelaEntrar } from "@/adapters/entrada/ui/telas/entrar/TelaEntrar";
+
+export const metadata: Metadata = { title: "Entrar · Expresso Café" };
+
+export default async function Page({ searchParams }: PageProps<"/entrar">) {
+  const { proximo } = await searchParams;
+  return <TelaEntrar proximo={typeof proximo === "string" ? proximo : undefined} />;
+}

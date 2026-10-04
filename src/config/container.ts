@@ -1,4 +1,17 @@
+import { ClienteApi } from "@/adapters/saida/http/cliente";
+import {
+  ClientesHttp,
+  DiasHttp,
+  EsperaHttp,
+  PedidosHttp,
+  ProducaoHttp,
+  ProdutosHttp,
+  SessaoHttp,
+} from "@/adapters/saida/http/GatewaysHttp";
 import { criarAdaptadoresEmMemoria } from "@/adapters/saida/memoria";
+import { EventosSSE } from "@/adapters/saida/tempo-real/EventosSSE";
+import type { Usuario } from "@/core/application/portas/SessaoGateway";
+import { COOKIE_SESSAO } from "./sessao";
 import { MensageiroWhatsApp } from "@/adapters/saida/whatsapp/MensageiroWhatsApp";
 import { Sessao } from "@/core/application/casos-de-uso/auth/Sessao";
 import { BuscarClientes } from "@/core/application/casos-de-uso/clientes/BuscarClientes";
@@ -19,12 +32,38 @@ import { RegistrarPagamento } from "@/core/application/casos-de-uso/pedidos/Regi
 import { SalvarProducao } from "@/core/application/casos-de-uso/producao/SalvarProducao";
 import { GerenciarProdutos } from "@/core/application/casos-de-uso/produtos/GerenciarProdutos";
 
+/** Imita o cookie httpOnly que a API grava, para o proxy.ts deixar entrar também sem API. */
+function gravarCookieDeSessao(usuario: Usuario | null) {
+  if (typeof document === "undefined") return;
+  const umAno = 60 * 60 * 24 * 365;
+  document.cookie = usuario
+    ? `${COOKIE_SESSAO}=memoria; path=/; max-age=${umAno}; samesite=lax`
+    : `${COOKIE_SESSAO}=; path=/; max-age=0; samesite=lax`;
+}
+
+/** Com NEXT_PUBLIC_API_URL usa a API e o SSE; sem ela, os adaptadores em memória. */
+function criarSaida() {
+  const urlApi = process.env.NEXT_PUBLIC_API_URL;
+  if (!urlApi) return criarAdaptadoresEmMemoria({ atrasoMs: 250, aoMudarSessao: gravarCookieDeSessao });
+  const api = new ClienteApi(urlApi.replace(/\/$/, ""));
+  return {
+    dias: new DiasHttp(api),
+    pedidos: new PedidosHttp(api),
+    producao: new ProducaoHttp(api),
+    clientes: new ClientesHttp(api),
+    produtos: new ProdutosHttp(api),
+    espera: new EsperaHttp(api),
+    sessao: new SessaoHttp(api),
+    eventos: new EventosSSE(api.baseUrl),
+  };
+}
+
 /**
  * Único lugar que sabe quais adaptadores estão em uso.
- * Quando a API existir, troque aqui cada gateway em memória pelo HTTP (um de cada vez).
+ * Para ligar uma porta na API antes das outras, troque só ela aqui.
  */
 export function criarContainer() {
-  const saida = criarAdaptadoresEmMemoria({ atrasoMs: 250 });
+  const saida = criarSaida();
   const mensageiro = new MensageiroWhatsApp();
 
   return {

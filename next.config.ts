@@ -1,8 +1,9 @@
+import { withSerwist } from "@serwist/turbopack";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
 };
 
-export default nextConfig;
+// O service worker (PWA) é gerado pela rota src/app/serwist/[path]/route.ts.
+export default withSerwist(nextConfig);

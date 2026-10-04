@@ -340,7 +340,11 @@ export class EsperaEmMemoria implements EsperaGateway {
 export class SessaoEmMemoria implements SessaoGateway {
   private usuario: Usuario | null = { id: "u1", nome: "Você", email: "voce@expressocafe.com" };
 
-  constructor(private readonly banco: BancoEmMemoria) {}
+  /** `aoMudar` deixa o container imitar o cookie que a API real grava, para o proxy.ts funcionar igual. */
+  constructor(
+    private readonly banco: BancoEmMemoria,
+    private readonly aoMudar: (usuario: Usuario | null) => void = () => {},
+  ) {}
 
   async entrar(email: string, senha: string): Promise<Usuario> {
     await this.banco.esperar();
@@ -348,11 +352,13 @@ export class SessaoEmMemoria implements SessaoGateway {
       throw new ErroDeDominio("login-invalido", "E-mail ou senha incorretos.");
     }
     this.usuario = { id: "u1", nome: email.split("@")[0], email };
+    this.aoMudar(this.usuario);
     return this.usuario;
   }
 
   async sair(): Promise<void> {
     this.usuario = null;
+    this.aoMudar(null);
   }
 
   async atual(): Promise<Usuario | null> {

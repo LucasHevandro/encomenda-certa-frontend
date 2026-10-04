@@ -32,7 +32,7 @@ export function TelaPedidos({ diaId }: { diaId: string }) {
         sobretitulo="Pedidos"
         data={painel.data ? dataLonga(painel.data.dia.data) : "…"}
         acao={
-          <span className="hidden tablet:contents">
+          <span className="hidden tablet:contents desktop:hidden">
             <LinkBotao href={`/dias/${diaId}/pedidos/novo`} variante="primario" tamanho="md" icone="mais">
               Novo pedido
             </LinkBotao>
