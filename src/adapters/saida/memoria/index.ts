@@ -11,6 +11,7 @@ import {
   ProducaoEmMemoria,
   ProdutosEmMemoria,
   SessaoEmMemoria,
+  UsuariosEmMemoria,
 } from "./GatewaysEmMemoria";
 
 /** Todos os adaptadores em memória, ligados ao mesmo banco falso. */
@@ -30,6 +31,7 @@ export function criarAdaptadoresEmMemoria({
     produtos: new ProdutosEmMemoria(banco),
     espera: new EsperaEmMemoria(banco),
     sessao: new SessaoEmMemoria(banco, aoMudarSessao),
+    usuarios: new UsuariosEmMemoria(banco),
     eventos: new EventosEmMemoria(banco),
     mensageiro: new MensageiroEmMemoria(),
   };

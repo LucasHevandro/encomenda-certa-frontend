@@ -21,6 +21,11 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
   banco.producao.set("2026-10-11", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-09-27", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
 
+  banco.usuarios = [
+    { id: "u1", nome: "Você", email: "voce@expressocafe.com" },
+    { id: "u2", nome: "Maria", email: "maria@expressocafe.com" },
+  ];
+
   banco.clientes = [
     { id: "c1", nome: "João da Silva", telefone: "44999999999", pedidosAnteriores: 12 },
     { id: "c2", nome: "Maria Oliveira", telefone: "44988887777", pedidosAnteriores: 5 },

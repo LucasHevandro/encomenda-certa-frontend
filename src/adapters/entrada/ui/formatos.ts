@@ -85,6 +85,13 @@ export function dataCompleta(iso: string): string {
   return `${doisDigitos(data.getDate())}/${doisDigitos(data.getMonth() + 1)}/${data.getFullYear()}`;
 }
 
+/** "04/10 às 14:32", para o registro de quem fez. */
+export function dataHora(iso: string): string {
+  const data = new Date(iso);
+  const doisDigitos = (n: number) => String(n).padStart(2, "0");
+  return `${doisDigitos(data.getDate())}/${doisDigitos(data.getMonth() + 1)} às ${hora(iso)}`;
+}
+
 /** "14:32", para o histórico de alterações. */
 export function hora(iso: string): string {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });

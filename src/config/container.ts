@@ -7,12 +7,14 @@ import {
   ProducaoHttp,
   ProdutosHttp,
   SessaoHttp,
+  UsuariosHttp,
 } from "@/adapters/saida/http/GatewaysHttp";
 import { criarAdaptadoresEmMemoria } from "@/adapters/saida/memoria";
 import { EventosSSE } from "@/adapters/saida/tempo-real/EventosSSE";
 import type { Usuario } from "@/core/application/portas/SessaoGateway";
 import { COOKIE_SESSAO } from "./sessao";
 import { MensageiroWhatsApp } from "@/adapters/saida/whatsapp/MensageiroWhatsApp";
+import { GerenciarUsuarios } from "@/core/application/casos-de-uso/auth/GerenciarUsuarios";
 import { Sessao } from "@/core/application/casos-de-uso/auth/Sessao";
 import { BuscarClientes } from "@/core/application/casos-de-uso/clientes/BuscarClientes";
 import { AbrirDiaVenda } from "@/core/application/casos-de-uso/dias/AbrirDiaVenda";
@@ -28,6 +30,7 @@ import { EnviarConfirmacao } from "@/core/application/casos-de-uso/pedidos/Envia
 import { ListarPedidos } from "@/core/application/casos-de-uso/pedidos/ListarPedidos";
 import { MarcarRetirado } from "@/core/application/casos-de-uso/pedidos/MarcarRetirado";
 import { ObterPedido } from "@/core/application/casos-de-uso/pedidos/ObterPedido";
+import { ReativarPedido } from "@/core/application/casos-de-uso/pedidos/ReativarPedido";
 import { RegistrarPagamento } from "@/core/application/casos-de-uso/pedidos/RegistrarPagamento";
 import { SalvarProducao } from "@/core/application/casos-de-uso/producao/SalvarProducao";
 import { GerenciarProdutos } from "@/core/application/casos-de-uso/produtos/GerenciarProdutos";
@@ -67,6 +70,7 @@ function criarSaida() {
     produtos: new ProdutosHttp(api),
     espera: new EsperaHttp(api),
     sessao: new SessaoHttp(api),
+    usuarios: new UsuariosHttp(api),
     eventos: new EventosSSE(api.baseUrl),
   };
 }
@@ -83,6 +87,7 @@ export function criarContainer() {
     eventos: saida.eventos,
     casos: {
       sessao: new Sessao(saida.sessao),
+      usuarios: new GerenciarUsuarios(saida.usuarios),
       listarDias: new ListarDias(saida.dias),
       abrirDia: new AbrirDiaVenda(saida.dias),
       obterPainel: new ObterPainel(saida.dias),
@@ -95,6 +100,7 @@ export function criarContainer() {
       marcarRetirado: new MarcarRetirado(saida.pedidos),
       registrarPagamento: new RegistrarPagamento(saida.pedidos),
       cancelarPedido: new CancelarPedido(saida.pedidos),
+      reativarPedido: new ReativarPedido(saida.pedidos),
       enviarConfirmacao: new EnviarConfirmacao(mensageiro),
       producao: new SalvarProducao(saida.producao),
       clientes: new BuscarClientes(saida.clientes),

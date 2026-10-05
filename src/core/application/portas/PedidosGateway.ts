@@ -28,4 +28,6 @@ export interface PedidosGateway {
   marcarRetirado(pedidoId: string): Promise<Pedido>;
   registrarPagamento(pedidoId: string, pagamento: Pagamento): Promise<Pedido>;
   cancelar(pedidoId: string): Promise<ResultadoCancelamento>;
+  /** Volta um cancelado para reservado. Lança QuantidadeIndisponivel quando não cabe mais. */
+  reativar(pedidoId: string): Promise<Pedido>;
 }

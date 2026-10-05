@@ -5,6 +5,7 @@ import type { FiltroPedidos, NovoPedido, PedidosGateway, ResultadoCancelamento }
 import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/portas/ProducaoGateway";
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
+import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import type { EstoqueDoProduto, ItemSolicitado } from "@/core/domain/disponibilidade/Disponibilidade";
@@ -77,6 +78,11 @@ export class PedidosHttp implements PedidosGateway {
   cancelar(pedidoId: string): Promise<ResultadoCancelamento> {
     return this.api.post(`/pedidos/${id(pedidoId)}/cancelamento`);
   }
+
+  /** 409 vira QuantidadeIndisponivel { maximo } em erros.ts. */
+  async reativar(pedidoId: string): Promise<Pedido> {
+    return paraPedido(await this.api.post<PedidoApi>(`/pedidos/${id(pedidoId)}/reativacao`));
+  }
 }
 
 export class ProducaoHttp implements ProducaoGateway {
@@ -138,6 +144,22 @@ export class EsperaHttp implements EsperaGateway {
 
   mudarStatus(entradaId: string, status: EntradaEspera["status"]): Promise<EntradaEspera> {
     return this.api.patch(`/espera/${id(entradaId)}`, { status });
+  }
+}
+
+export class UsuariosHttp implements UsuariosGateway {
+  constructor(private readonly api: ClienteApi) {}
+
+  listar(): Promise<Usuario[]> {
+    return this.api.get("/usuarios");
+  }
+
+  criar(usuario: NovoUsuario): Promise<Usuario> {
+    return this.api.post("/usuarios", usuario);
+  }
+
+  mudarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
+    return this.api.put("/sessao/senha", { senhaAtual, novaSenha });
   }
 }
 

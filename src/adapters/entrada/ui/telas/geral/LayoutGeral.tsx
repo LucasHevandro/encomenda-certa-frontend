@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/dias", rotulo: "Dias de venda", curto: "Dias" },
   { href: "/produtos", rotulo: "Produtos", curto: "Produtos" },
   { href: "/clientes", rotulo: "Clientes", curto: "Clientes" },
+  { href: "/pessoas", rotulo: "Pessoas", curto: "Pessoas" },
 ];
 
 /** Casca das telas de gestão, que não pertencem a um dia: dias, produtos e clientes. */
@@ -36,7 +37,7 @@ export function LayoutGeral({ children }: { children: ReactNode }) {
           >
             Sair
           </button>
-          <div className="col-span-2 -mx-4 grid grid-cols-3 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
+          <div className="col-span-2 -mx-4 grid grid-cols-4 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
             {LINKS.map((link) => {
               const ativo = caminho === link.href || caminho.startsWith(`${link.href}/`);
               return (
@@ -45,7 +46,7 @@ export function LayoutGeral({ children }: { children: ReactNode }) {
                   href={link.href}
                   aria-current={ativo ? "page" : undefined}
                   className={cx(
-                    "flex min-h-12 items-center justify-center border-b-2 px-3 text-rotulo whitespace-nowrap",
+                    "flex min-h-12 items-center justify-center border-b-2 px-1 text-rotulo whitespace-nowrap tablet:px-3",
                     ativo ? "border-brasa text-brasa" : "border-transparent text-ink-muted",
                   )}
                 >

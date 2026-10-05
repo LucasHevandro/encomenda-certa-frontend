@@ -5,6 +5,7 @@ import type { NovaEntradaEspera } from "@/core/application/casos-de-uso/espera/L
 import type { NovaProducao } from "@/core/application/casos-de-uso/producao/SalvarProducao";
 import type { AbrirDia } from "@/core/application/portas/DiasGateway";
 import type { NovoPedido } from "@/core/application/portas/PedidosGateway";
+import type { NovoUsuario } from "@/core/application/portas/UsuariosGateway";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { EstoqueDoProduto, ItemSolicitado } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { Pagamento, Pedido } from "@/core/domain/pedido/Pedido";
@@ -63,6 +64,29 @@ export function useCancelarPedido(diaId: string) {
   const { cancelarPedido } = useCasosDeUso();
   const recarregar = useRecarregarDia();
   return useMutation({ mutationFn: (pedidoId: string) => cancelarPedido.executar(pedidoId), onSuccess: () => recarregar(diaId) });
+}
+
+/** Se as unidades já foram vendidas, `error` é QuantidadeIndisponivel com o máximo. */
+export function useReativarPedido(diaId: string, estoquesNaTela?: readonly EstoqueDoProduto[]) {
+  const { reativarPedido } = useCasosDeUso();
+  const recarregar = useRecarregarDia();
+  return useMutation({ mutationFn: (pedido: Pedido) => reativarPedido.executar(pedido, estoquesNaTela), onSuccess: () => recarregar(diaId) });
+}
+
+export function useCriarUsuario() {
+  const { usuarios } = useCasosDeUso();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (novo: NovoUsuario) => usuarios.criar(novo),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.usuarios() }),
+  });
+}
+
+export function useMudarSenha() {
+  const { usuarios } = useCasosDeUso();
+  return useMutation({
+    mutationFn: ({ atual, nova, confirmacao }: { atual: string; nova: string; confirmacao: string }) => usuarios.mudarSenha(atual, nova, confirmacao),
+  });
 }
 
 export function useSalvarProducao(diaId: string) {

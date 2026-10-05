@@ -12,6 +12,7 @@ export const chaves = {
   espera: (diaId: string) => ["dia", diaId, "espera"] as const,
   fechamento: (diaId: string) => ["dia", diaId, "fechamento"] as const,
   produtos: () => ["produtos"] as const,
+  usuarios: () => ["usuarios"] as const,
   clientes: () => ["clientes"] as const,
   clientePorTelefone: (digitos: string) => ["clientes", "telefone", digitos] as const,
 };

@@ -32,6 +32,7 @@ export function MenuMais({ diaId, aberto, aoFechar }: { diaId: string; aberto: b
           <ItemLista icone="relogio" titulo="Dias de venda" subtitulo="Trocar de dia, abrir um novo, histórico" onClick={() => ir("/dias")} />
           <ItemLista icone="producao" titulo="Produtos e preços" onClick={() => ir("/produtos")} />
           <ItemLista icone="cliente" titulo="Clientes" onClick={() => ir("/clientes")} />
+          <ItemLista icone="cliente" titulo="Pessoas e senha" subtitulo="Quem tem acesso, trocar minha senha" onClick={() => ir("/pessoas")} />
           <ItemLista icone="fechar" titulo="Sair" onClick={sair} />
         </GrupoLista>
       </div>

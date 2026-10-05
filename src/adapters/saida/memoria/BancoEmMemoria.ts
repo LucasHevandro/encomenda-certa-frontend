@@ -15,6 +15,7 @@ import type { Produto } from "@/core/domain/produto/Produto";
  */
 export class BancoEmMemoria {
   produtos: Produto[] = [];
+  usuarios: { id: string; nome: string; email: string }[] = [];
   dias: DiaVenda[] = [];
   /** diaId → (produtoId → quantidade produzida). */
   producao = new Map<string, Map<string, number>>();

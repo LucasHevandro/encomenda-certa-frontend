@@ -7,6 +7,7 @@ import type { FiltroPedidos, NovoPedido, PedidosGateway, ResultadoCancelamento }
 import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/portas/ProducaoGateway";
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
+import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import { type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
 import { type DiaVenda, estaAberto as diaAberto, validarNovaData } from "@/core/domain/dia-venda/DiaVenda";
@@ -16,6 +17,9 @@ import { estaAberto, type ItemPedido, type Pagamento, type Pedido, totalDoPedido
 import { validarNovaProducao } from "@/core/domain/producao/Producao";
 import type { Produto } from "@/core/domain/produto/Produto";
 import type { BancoEmMemoria } from "./BancoEmMemoria";
+
+/** Quem aparece no registro dos pedidos feitos sem a API. */
+const QUEM = "Você";
 
 const naoEncontrado = (o_que: string) => new ErroDeDominio("nao-encontrado", `${o_que} não encontrado.`);
 
@@ -131,6 +135,7 @@ export class PedidosEmMemoria implements PedidosGateway {
       itens: this.montarItens(novo.itens),
       retirada: "reservado",
       pagamento: "pendente",
+      registro: { reservadoPor: QUEM, reservadoEm: new Date().toISOString() },
     };
     this.banco.pedidos.push(pedido);
     this.lembrarCliente(pedido);
@@ -160,7 +165,7 @@ export class PedidosEmMemoria implements PedidosGateway {
     await this.banco.esperar();
     const atual = this.buscarAberto(pedidoId);
     diaParaEscrita(this.banco, atual.diaId);
-    return this.substituir({ ...atual, retirada: "retirado" });
+    return this.substituir({ ...atual, retirada: "retirado", registro: { ...atual.registro, retiradoPor: QUEM, retiradoEm: new Date().toISOString() } });
   }
 
   async registrarPagamento(pedidoId: string, pagamento: Pagamento): Promise<Pedido> {
@@ -173,7 +178,7 @@ export class PedidosEmMemoria implements PedidosGateway {
     await this.banco.esperar();
     const atual = this.buscarAberto(pedidoId);
     diaParaEscrita(this.banco, atual.diaId);
-    this.substituir({ ...atual, retirada: "cancelado" });
+    this.substituir({ ...atual, retirada: "cancelado", registro: { ...atual.registro, canceladoPor: QUEM, canceladoEm: new Date().toISOString() } });
     const produtos = new Set(atual.itens.map((i) => i.produtoId));
     const clientesAguardando = this.banco.espera.filter(
       (e) => e.diaId === atual.diaId && e.status === "aguardando" && produtos.has(e.produtoId),
@@ -182,6 +187,16 @@ export class PedidosEmMemoria implements PedidosGateway {
       this.banco.emitir(atual.diaId, { tipo: "unidades-liberadas", produtoId: item.produtoId, quantidade: item.quantidade });
     }
     return { unidadesLiberadas: atual.itens.reduce((t, i) => t + i.quantidade, 0), clientesAguardando };
+  }
+
+  async reativar(pedidoId: string): Promise<Pedido> {
+    await this.banco.esperar();
+    const atual = this.buscar(pedidoId);
+    if (atual.retirada !== "cancelado") throw new ErroDeDominio("pedido-nao-cancelado", "Só dá para reativar pedido cancelado.");
+    diaParaEscrita(this.banco, atual.diaId);
+    verificarItens(this.banco.estoques(atual.diaId), atual.itens);
+    // Volta a reservado e o registro do cancelamento some.
+    return this.substituir({ ...atual, retirada: "reservado", registro: { ...atual.registro, canceladoPor: undefined, canceladoEm: undefined } });
   }
 
   private buscar(pedidoId: string): Pedido {
@@ -363,6 +378,31 @@ export class SessaoEmMemoria implements SessaoGateway {
 
   async atual(): Promise<Usuario | null> {
     return this.usuario;
+  }
+}
+
+export class UsuariosEmMemoria implements UsuariosGateway {
+  constructor(private readonly banco: BancoEmMemoria) {}
+
+  async listar(): Promise<Usuario[]> {
+    await this.banco.esperar();
+    return [...this.banco.usuarios].sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+
+  async criar({ nome, email }: NovoUsuario): Promise<Usuario> {
+    await this.banco.esperar();
+    if (this.banco.usuarios.some((u) => u.email === email)) {
+      throw new ErroDeDominio("email-ja-existe", "Já existe um usuário com esse e-mail.");
+    }
+    const usuario = { id: crypto.randomUUID(), nome, email };
+    this.banco.usuarios.push(usuario);
+    return usuario;
+  }
+
+  /** Sem API não há senha de verdade: só confere que algo foi digitado. */
+  async mudarSenha(senhaAtual: string): Promise<void> {
+    await this.banco.esperar();
+    if (senhaAtual === "") throw new ErroDeDominio("senha-atual-incorreta", "A senha atual está incorreta.");
   }
 }
 
