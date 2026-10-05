@@ -87,7 +87,7 @@ export function TelaProducao({ diaId }: { diaId: string }) {
       <CabecalhoDia sobretitulo="Produção" data={dataLonga(dia.data)} />
 
       {!aberto && (
-        <Aviso tom="info" titulo="Este dia já foi fechado">
+        <Aviso tom="info" icone="check" titulo="Este dia já foi fechado">
           A produção fica só para consulta.
         </Aviso>
       )}
@@ -106,7 +106,7 @@ export function TelaProducao({ diaId }: { diaId: string }) {
                 key={estoque.produtoId}
                 className={cx(
                   "flex flex-col gap-3 rounded-lg border bg-surface-raised p-4 shadow-cartao",
-                  invalido ? "border-[1.5px] border-alerta" : "border-line",
+                  invalido && aberto ? "border-[1.5px] border-alerta" : "border-line",
                 )}
               >
                 {/* Nome à esquerda e seletor à direita, sempre na mesma linha; nome longo quebra em duas. */}
@@ -119,16 +119,24 @@ export function TelaProducao({ diaId }: { diaId: string }) {
                       </span>
                     )}
                   </div>
-                  <Quantidade
-                    className="shrink-0"
-                    rotulo={`Produção de ${estoque.nome}`}
-                    valor={nova}
-                    aoMudar={(n) => {
-                      setNovas((atual) => ({ ...atual, [estoque.produtoId]: n }));
-                      setSalvo(false);
-                      salvar.reset();
-                    }}
-                  />
+                  {aberto ? (
+                    <Quantidade
+                      className="shrink-0"
+                      rotulo={`Produção de ${estoque.nome}`}
+                      valor={nova}
+                      aoMudar={(n) => {
+                        setNovas((atual) => ({ ...atual, [estoque.produtoId]: n }));
+                        setSalvo(false);
+                        salvar.reset();
+                      }}
+                    />
+                  ) : (
+                    // Dia fechado: só consulta, sem seletor.
+                    <div className="shrink-0 text-right">
+                      <span className="block text-rotulo text-ink-muted">Produção</span>
+                      <span className="font-display text-numero-lg tabular-nums">{estoque.producao}</span>
+                    </div>
+                  )}
                 </div>
                 <dl className="m-0 grid grid-cols-3 gap-2">
                   <div>
@@ -146,7 +154,7 @@ export function TelaProducao({ diaId }: { diaId: string }) {
                     </dd>
                   </div>
                 </dl>
-                {invalido && (
+                {invalido && aberto && (
                   <Aviso
                     tom="alerta"
                     titulo="Produção menor que as reservas"

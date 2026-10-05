@@ -19,7 +19,7 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
   ];
   banco.producao.set("2026-10-04", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-10-11", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
-  banco.producao.set("2026-09-27", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
+  banco.producao.set("2026-09-27", new Map([["frango", 50], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
 
   banco.usuarios = [
     { id: "u1", nome: "Você", email: "voce@expressocafe.com" },
