@@ -48,9 +48,12 @@ export function BarraNavegacao({
         const icone = (
           <span
             className={cx(
-              "grid h-[30px] w-14 place-items-center rounded-full desktop:h-auto desktop:w-auto",
+              "grid place-items-center rounded-full desktop:size-auto",
+              // O + Pedido é um círculo de 64px que sobe acima da barra; os outros, uma pílula baixa.
+              fab
+                ? "-mt-8 size-16 border-4 border-surface-raised bg-brasa text-on-brasa shadow-flutuante desktop:mt-0 desktop:border-0 desktop:bg-transparent desktop:shadow-none"
+                : "h-[30px] w-14 desktop:w-auto",
               marcado && !fab && "bg-brasa-soft desktop:bg-transparent",
-              fab && "-mt-7 size-16 bg-brasa text-on-brasa shadow-flutuante desktop:mt-0 desktop:size-auto desktop:shadow-none",
             )}
           >
             <Icone nome={item.icone} tamanho={fab ? 30 : 24} className={fab ? "desktop:size-6" : undefined} />
