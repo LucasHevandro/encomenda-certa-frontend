@@ -25,7 +25,7 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
-    ...(urlApi ? [{ matcher: ({ url }: { url: URL }) => url.href.startsWith(urlApi), handler: new NetworkOnly() }] : []),
+    ...(urlApi ? [{ matcher: ({ url }: { url: URL }) => (urlApi.startsWith("/") ? url.pathname.startsWith(urlApi + "/") : url.href.startsWith(urlApi)), handler: new NetworkOnly() }] : []),
     ...defaultCache,
   ],
   fallbacks: {

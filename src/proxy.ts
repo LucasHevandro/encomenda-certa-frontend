@@ -20,6 +20,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Fora: arquivos do Next, service worker, manifesto, ícones e a página offline.
-  matcher: ["/((?!_next/|serwist/|manifest.webmanifest|icon|apple-icon|favicon.ico|offline).*)"],
+  // Fora: chamadas da API (/api, a API confere a sessão), arquivos do Next, service worker, manifesto, ícones e a página offline.
+  matcher: ["/((?!api/|_next/|serwist/|manifest.webmanifest|icon|apple-icon|favicon.ico|offline).*)"],
 };

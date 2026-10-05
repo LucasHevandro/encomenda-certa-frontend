@@ -18,11 +18,11 @@ pnpm build     # build de produção, com o service worker (PWA)
 
 ## Ligar na API
 
-Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_API_URL`. O `src/config/container.ts` passa a usar os gateways HTTP (`adapters/saida/http`) e o tempo real por SSE (`adapters/saida/tempo-real`). Para ligar uma porta de cada vez, troque só ela no container.
+Copie `.env.example` para `.env.local` (`NEXT_PUBLIC_API_URL=/api` e `API_INTERNA` com o endereço da API). O navegador chama `/api/...` no próprio endereço do app e o Next repassa para a API, então o cookie de sessão funciona em qualquer aparelho, inclusive no celular pela rede (http://IP-do-computador:3000). O `src/config/container.ts` passa a usar os gateways HTTP (`adapters/saida/http`) e o tempo real por SSE (`adapters/saida/tempo-real`). Para ligar uma porta de cada vez, troque só ela no container.
 
 O que o front espera da API:
 
-- Cookie de sessão httpOnly com o nome de `NEXT_PUBLIC_COOKIE_SESSAO` e `Domain=.seudominio.com`, para o `src/proxy.ts` enxergar.
+- Cookie de sessão httpOnly com o nome de `NEXT_PUBLIC_COOKIE_SESSAO`. Com `/api` ele fica no endereço do app e o `src/proxy.ts` enxerga sem configurar domínio.
 - Erros como `{ codigo, mensagem, ...detalhes }`. O 409 `quantidade-indisponivel` traz `produtoId`, `nome`, `solicitado` e `maximo`, que vira o botão "Reservar N".
 - Dinheiro sempre em centavos (inteiro).
 - `GET /dias/:id/eventos` (SSE) com os eventos `disponibilidade-mudou` e `unidades-liberadas` (`{ produtoId, quantidade }`).

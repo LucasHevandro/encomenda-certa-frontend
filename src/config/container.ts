@@ -46,6 +46,8 @@ function gravarCookieDeSessao(usuario: Usuario | null) {
  * (ex.: http://192.168.0.10:3000), "localhost" seria o próprio celular: troca pelo endereço da página.
  */
 export function urlDaApi(configurada: string, paginaHost?: string): string {
+  // Caminho relativo (/api): o próprio Next repassa para a API, nada a ajustar.
+  if (configurada.startsWith("/")) return configurada.replace(/\/$/, "");
   const url = new URL(configurada);
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
   if (local && paginaHost && !["localhost", "127.0.0.1", "[::1]"].includes(paginaHost)) url.hostname = paginaHost;

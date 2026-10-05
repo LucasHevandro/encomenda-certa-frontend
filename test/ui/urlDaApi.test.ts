@@ -10,6 +10,10 @@ describe("urlDaApi", () => {
     expect(urlDaApi("http://localhost:3333", "192.168.0.10")).toBe("http://192.168.0.10:3333");
   });
 
+  it("caminho relativo fica como está", () => {
+    expect(urlDaApi("/api/", "192.168.0.10")).toBe("/api");
+  });
+
   it("endereço de produção não muda", () => {
     expect(urlDaApi("https://api.expressocafe.com", "app.expressocafe.com")).toBe("https://api.expressocafe.com");
   });
