@@ -30,6 +30,10 @@ O que o front espera da API:
 
 As rotas estão em `src/adapters/saida/http/GatewaysHttp.ts`, uma classe por porta, e usam os tipos gerados do contrato da API (`schema.d.ts`). Depois de mudar a API, rode `pnpm openapi` no backend e `pnpm api:tipos` aqui: o TypeScript aponta o que deixou de bater.
 
+## Publicar
+
+O app vai na Vercel e a API no Railway. Na Vercel, defina `NEXT_PUBLIC_API_URL=/api` e `API_INTERNA` com o endereço do Railway antes do deploy. O passo a passo completo está no [PUBLICAR.md do backend](https://github.com/LucasHevandro/expresso-cafe-backend/blob/master/PUBLICAR.md).
+
 ## Estrutura
 
 ```
