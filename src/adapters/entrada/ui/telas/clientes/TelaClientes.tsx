@@ -33,6 +33,7 @@ export function TelaClientes() {
           {visiveis.map((cliente) => (
             <ItemLista
               key={cliente.id}
+              href={`/clientes/${cliente.id}`}
               icone="cliente"
               titulo={cliente.nome}
               subtitulo={cliente.telefone ? telefone(cliente.telefone) : "Sem telefone"}

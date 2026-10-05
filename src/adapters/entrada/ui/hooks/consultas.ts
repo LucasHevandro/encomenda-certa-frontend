@@ -66,6 +66,11 @@ export function useClientes() {
   return useQuery({ queryKey: chaves.clientes(), queryFn: () => clientes.listar() });
 }
 
+export function useHistoricoCliente(clienteId: string) {
+  const { clientes } = useCasosDeUso();
+  return useQuery({ queryKey: chaves.cliente(clienteId), queryFn: () => clientes.historico(clienteId) });
+}
+
 /** Procura o cliente assim que o telefone tem DDD + número. */
 export function useClientePorTelefone(telefone: string) {
   const { clientes } = useCasosDeUso();

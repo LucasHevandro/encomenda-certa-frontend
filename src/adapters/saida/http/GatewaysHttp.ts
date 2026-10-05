@@ -6,6 +6,7 @@ import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/port
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
+import type { PedidoDoHistorico } from "@/core/domain/cliente/Historico";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import type { EstoqueDoProduto, ItemSolicitado } from "@/core/domain/disponibilidade/Disponibilidade";
@@ -111,6 +112,11 @@ export class ClientesHttp implements ClientesGateway {
 
   listar(): Promise<ClienteEncontrado[]> {
     return this.api.get("/clientes");
+  }
+
+  async historico(clienteId: string): Promise<{ cliente: ClienteEncontrado; pedidos: PedidoDoHistorico[] }> {
+    const { cliente, pedidos } = await this.api.get<{ cliente: ClienteEncontrado; pedidos: (PedidoApi & { data: string })[] }>(`/clientes/${id(clienteId)}`);
+    return { cliente, pedidos: pedidos.map((p) => ({ ...paraPedido(p), data: p.data })) };
   }
 }
 

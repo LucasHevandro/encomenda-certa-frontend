@@ -1,4 +1,5 @@
 import type { ClientesGateway, ClienteEncontrado } from "@/core/application/portas/ClientesGateway";
+import type { PedidoDoHistorico } from "@/core/domain/cliente/Historico";
 import type { AbrirDia, DiasGateway, PainelDoDia, ResumoDia, SugestaoProducao } from "@/core/application/portas/DiasGateway";
 import type { EsperaGateway } from "@/core/application/portas/EsperaGateway";
 import type { EventosTempoReal, EventoDoDia } from "@/core/application/portas/EventosTempoReal";
@@ -294,6 +295,18 @@ export class ClientesEmMemoria implements ClientesGateway {
   async listar(): Promise<ClienteEncontrado[]> {
     await this.banco.esperar();
     return [...this.banco.clientes].sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+
+  /** Sem banco de verdade, o pedido é do cliente pelo telefone ou, sem telefone, pelo nome. */
+  async historico(clienteId: string): Promise<{ cliente: ClienteEncontrado; pedidos: PedidoDoHistorico[] }> {
+    await this.banco.esperar();
+    const cliente = this.banco.clientes.find((c) => c.id === clienteId);
+    if (!cliente) throw naoEncontrado("Cliente");
+    const pedidos = this.banco.pedidos
+      .filter((p) => (p.cliente.telefone ? p.cliente.telefone === cliente.telefone : p.cliente.nome === cliente.nome))
+      .map((p) => ({ ...p, data: this.banco.dias.find((d) => d.id === p.diaId)?.data ?? p.diaId }))
+      .sort((a, b) => b.data.localeCompare(a.data) || b.numero - a.numero);
+    return { cliente, pedidos };
   }
 }
 

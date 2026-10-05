@@ -1,3 +1,4 @@
+import { resumirHistorico } from "../../../domain/cliente/Historico";
 import type { ClienteEncontrado, ClientesGateway } from "../../portas/ClientesGateway";
 
 /** Telefone com DDD tem 10 ou 11 dígitos; antes disso não vale perguntar à API. */
@@ -14,5 +15,11 @@ export class BuscarClientes {
 
   listar(): Promise<ClienteEncontrado[]> {
     return this.clientes.listar();
+  }
+
+  /** Pedidos anteriores, quanto já comprou e o que costuma pedir. */
+  async historico(clienteId: string) {
+    const { cliente, pedidos } = await this.clientes.historico(clienteId);
+    return { cliente, pedidos, resumo: resumirHistorico(pedidos) };
   }
 }

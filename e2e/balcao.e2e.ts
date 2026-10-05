@@ -110,10 +110,20 @@ test("fechar o domingo deixa o dia só para consulta", async ({ page }) => {
   await expect(page.getByRole("button", { name: /Produção de/ })).toHaveCount(0);
 });
 
+test("histórico do cliente: quanto já comprou e o que costuma pedir", async ({ page }) => {
+  await entrar(page, "/clientes");
+  await page.getByRole("link", { name: /João da Silva/ }).click();
+  await expect(page.getByRole("heading", { name: "João da Silva" })).toBeVisible();
+  await expect(page.getByText("já comprou")).toBeVisible();
+  await expect(page.getByText("2 Frangos assados").first()).toBeVisible();
+  await page.getByRole("link", { name: /#0258/ }).click();
+  await expect(page).toHaveURL(/\/pedidos\/p258$/);
+});
+
 test("nenhuma tela passa da largura do celular", async ({ page }, info) => {
   test.skip(info.project.name !== "celular", "só no celular");
   await entrar(page, "/dias");
-  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/produtos", "/clientes", "/pessoas"];
+  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/produtos", "/clientes", "/clientes/c1", "/pessoas"];
   for (const tela of telas) {
     // O cookie de sessão continua depois do login, então dá para abrir cada tela direto.
     await page.goto(tela);
