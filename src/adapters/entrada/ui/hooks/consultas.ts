@@ -56,6 +56,11 @@ export function useDias() {
   return useQuery({ queryKey: chaves.dias(), queryFn: () => listarDias.executar() });
 }
 
+export function useRelatorio(dias: number) {
+  const { relatorio } = useCasosDeUso();
+  return useQuery({ queryKey: chaves.relatorio(dias), queryFn: () => relatorio.executar(dias), placeholderData: (anterior) => anterior });
+}
+
 export function useUsuarios() {
   const { usuarios } = useCasosDeUso();
   return useQuery({ queryKey: chaves.usuarios(), queryFn: () => usuarios.listar() });

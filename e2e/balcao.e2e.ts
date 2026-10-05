@@ -120,10 +120,23 @@ test("histórico do cliente: quanto já comprou e o que costuma pedir", async ({
   await expect(page).toHaveURL(/\/pedidos\/p258$/);
 });
 
+test("relatório entre dias mostra o aproveitamento de cada produto", async ({ page }) => {
+  await entrar(page, "/dias");
+  await page.getByRole("link", { name: "Relatório entre dias" }).click();
+  await expect(page.getByRole("heading", { name: "Relatório" })).toBeVisible();
+  await expect(page.getByText("vendidos em 3 dias")).toBeVisible();
+  const frango = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Frango assado" }) });
+  await expect(frango.getByText("da produção vendida")).toBeVisible();
+  await frango.getByText("Dia a dia").click();
+  await expect(frango.getByRole("cell", { name: "Domingo, 27/09" })).toBeVisible();
+  await page.getByRole("radio", { name: "Últimos 4 dias" }).click();
+  await expect(page.getByText("vendidos em 3 dias")).toBeVisible();
+});
+
 test("nenhuma tela passa da largura do celular", async ({ page }, info) => {
   test.skip(info.project.name !== "celular", "só no celular");
   await entrar(page, "/dias");
-  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/produtos", "/clientes", "/clientes/c1", "/pessoas"];
+  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/dias/relatorio", "/produtos", "/clientes", "/clientes/c1", "/pessoas"];
   for (const tela of telas) {
     // O cookie de sessão continua depois do login, então dá para abrir cada tela direto.
     await page.goto(tela);

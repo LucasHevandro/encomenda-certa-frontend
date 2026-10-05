@@ -2,6 +2,7 @@
 export const chaves = {
   sessao: () => ["sessao"] as const,
   dias: () => ["dias"] as const,
+  relatorio: (dias: number) => ["dias", "relatorio", dias] as const,
   prontoParaAbrir: () => ["dias", "novo"] as const,
   dia: (diaId: string) => ["dia", diaId] as const,
   painel: (diaId: string) => ["dia", diaId, "painel"] as const,

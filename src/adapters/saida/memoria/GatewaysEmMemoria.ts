@@ -9,12 +9,13 @@ import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/port
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
-import { type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
+import { centavos, type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
 import { type DiaVenda, estaAberto as diaAberto, validarNovaData } from "@/core/domain/dia-venda/DiaVenda";
 import { disponiveis, type ItemSolicitado, verificarItens } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import { estaAberto, type ItemPedido, type Pagamento, type Pedido, totalDoPedido } from "@/core/domain/pedido/Pedido";
+import { calcularFechamento, type DiaFechado } from "@/core/domain/fechamento/Fechamento";
 import { validarNovaProducao } from "@/core/domain/producao/Producao";
 import type { Produto } from "@/core/domain/produto/Produto";
 import type { BancoEmMemoria } from "./BancoEmMemoria";
@@ -73,6 +74,23 @@ export class DiasEmMemoria implements DiasGateway {
   async sugestaoProducao(): Promise<SugestaoProducao[]> {
     await this.banco.esperar();
     return [...this.banco.historicoProducao];
+  }
+
+  async relatorio(dias: number): Promise<DiaFechado[]> {
+    await this.banco.esperar();
+    return this.banco.dias
+      .filter((d) => d.status === "encerrado")
+      .sort((a, b) => b.data.localeCompare(a.data))
+      .slice(0, dias)
+      .map((dia) => ({
+        diaId: dia.id,
+        data: dia.data,
+        faturamento: this.banco.fechamentos.get(dia.id)?.faturamento ?? centavos(0),
+        produtos: calcularFechamento(
+          this.banco.estoques(dia.id),
+          this.banco.pedidos.filter((p) => p.diaId === dia.id),
+        ).produtos,
+      }));
   }
 
   async abrir(comando: AbrirDia): Promise<DiaVenda> {

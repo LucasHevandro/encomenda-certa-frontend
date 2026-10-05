@@ -21,6 +21,7 @@ import { AbrirDiaVenda } from "@/core/application/casos-de-uso/dias/AbrirDiaVend
 import { FecharDia } from "@/core/application/casos-de-uso/dias/FecharDia";
 import { ListarDias } from "@/core/application/casos-de-uso/dias/ListarDias";
 import { ObterFechamento } from "@/core/application/casos-de-uso/dias/ObterFechamento";
+import { RelatorioEntreDias } from "@/core/application/casos-de-uso/dias/RelatorioEntreDias";
 import { ObterPainel } from "@/core/application/casos-de-uso/dias/ObterPainel";
 import { ListaDeEspera } from "@/core/application/casos-de-uso/espera/ListaDeEspera";
 import { CancelarPedido } from "@/core/application/casos-de-uso/pedidos/CancelarPedido";
@@ -93,6 +94,7 @@ export function criarContainer() {
       obterPainel: new ObterPainel(saida.dias),
       fecharDia: new FecharDia(saida.dias),
       obterFechamento: new ObterFechamento(saida.dias, saida.pedidos),
+      relatorio: new RelatorioEntreDias(saida.dias),
       listarPedidos: new ListarPedidos(saida.pedidos),
       obterPedido: new ObterPedido(saida.pedidos),
       criarPedido: new CriarPedido(saida.pedidos),

@@ -16,10 +16,14 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
     { id: "2026-10-04", data: "2026-10-04", status: "aberto" },
     { id: "2026-10-11", data: "2026-10-11", status: "aberto" },
     { id: "2026-09-27", data: "2026-09-27", status: "encerrado" },
+    { id: "2026-09-20", data: "2026-09-20", status: "encerrado" },
+    { id: "2026-09-13", data: "2026-09-13", status: "encerrado" },
   ];
   banco.producao.set("2026-10-04", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-10-11", new Map([["frango", 40], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
   banco.producao.set("2026-09-27", new Map([["frango", 50], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
+  banco.producao.set("2026-09-20", new Map([["frango", 45], ["costela", 15], ["pernil", 10], ["maionese", 20]]));
+  banco.producao.set("2026-09-13", new Map([["frango", 40], ["costela", 12], ["pernil", 10], ["maionese", 15]]));
 
   banco.usuarios = [
     { id: "u1", nome: "Você", email: "voce@expressocafe.com" },
@@ -60,25 +64,30 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
     pedido(259, "Lúcia Ramos", [item("pernil", 9), item("maionese", 4)]),
   ];
 
-  // Domingo anterior, já fechado: pedidos variados e o fechamento calculado a partir deles.
+  // Domingos anteriores, já fechados: pedidos variados e o fechamento calculado a partir deles.
   const nomes = ["João da Silva", "Maria Oliveira", "Carlos Souza", "Pedro Alves", "Ana Lima", "Rita Melo"];
-  for (let i = 0; i < 24; i++) {
-    const itens = [item("frango", 1 + (i % 3)), ...(i % 2 ? [item("maionese", 1)] : []), ...(i % 4 === 0 ? [item("costela", 1)] : [])];
-    if (i % 6 === 5) itens.push(item("pernil", 2));
-    banco.pedidos.push(
-      pedido(230 + i, nomes[i % nomes.length], itens, {
-        id: `a${230 + i}`,
-        diaId: "2026-09-27",
-        retirada: i === 23 ? "reservado" : "retirado",
-        pagamento: i === 23 ? "pendente" : i % 2 ? "pix" : "dinheiro",
-      }),
+  const domingoFechado = (data: string, quantos: number, primeiroNumero: number) => {
+    for (let i = 0; i < quantos; i++) {
+      const itens = [item("frango", 1 + (i % 3)), ...(i % 2 ? [item("maionese", 1)] : []), ...(i % 4 === 0 ? [item("costela", 1)] : [])];
+      if (i % 6 === 5) itens.push(item("pernil", 2));
+      banco.pedidos.push(
+        pedido(primeiroNumero + i, nomes[i % nomes.length], itens, {
+          id: `a${primeiroNumero + i}`,
+          diaId: data,
+          retirada: i === quantos - 1 ? "reservado" : "retirado",
+          pagamento: i === quantos - 1 ? "pendente" : i % 2 ? "pix" : "dinheiro",
+        }),
+      );
+    }
+    const fechamento = calcularFechamento(
+      banco.estoques(data),
+      banco.pedidos.filter((p) => p.diaId === data),
     );
-  }
-  const anterior = calcularFechamento(
-    banco.estoques("2026-09-27"),
-    banco.pedidos.filter((p) => p.diaId === "2026-09-27"),
-  );
-  banco.fechamentos.set("2026-09-27", { faturamento: anterior.totalVendido, sobras: anterior.sobras });
+    banco.fechamentos.set(data, { faturamento: fechamento.totalVendido, sobras: fechamento.sobras });
+  };
+  domingoFechado("2026-09-13", 18, 190);
+  domingoFechado("2026-09-20", 21, 208);
+  domingoFechado("2026-09-27", 24, 230);
 
   banco.proximoNumero = 260;
 

@@ -8,6 +8,7 @@ import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGat
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import type { PedidoDoHistorico } from "@/core/domain/cliente/Historico";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
+import type { DiaFechado } from "@/core/domain/fechamento/Fechamento";
 import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import type { EstoqueDoProduto, ItemSolicitado } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
@@ -35,6 +36,11 @@ export class DiasHttp implements DiasGateway {
 
   sugestaoProducao(): Promise<SugestaoProducao[]> {
     return this.api.get("/dias/sugestao-producao");
+  }
+
+  async relatorio(dias: number): Promise<DiaFechado[]> {
+    const fotos = await this.api.get<(Omit<DiaFechado, "faturamento"> & { faturamento: number })[]>(`/dias/relatorio${query({ dias: String(dias) })}`);
+    return fotos.map((f) => ({ ...f, faturamento: dinheiro(f.faturamento) }));
   }
 
   abrir(comando: AbrirDia): Promise<DiaVenda> {

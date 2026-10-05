@@ -1,5 +1,6 @@
 import type { Dinheiro } from "../../domain/compartilhado/Dinheiro";
 import type { DiaVenda } from "../../domain/dia-venda/DiaVenda";
+import type { DiaFechado } from "../../domain/fechamento/Fechamento";
 import type { EstoqueDoProduto } from "../../domain/disponibilidade/Disponibilidade";
 
 /** Linha da tela "Dias de venda". */
@@ -43,6 +44,8 @@ export interface DiasGateway {
   listar(): Promise<ResumoDia[]>;
   obterPainel(diaId: string): Promise<PainelDoDia>;
   sugestaoProducao(): Promise<SugestaoProducao[]>;
+  /** Fotos dos últimos dias fechados, do mais recente para o mais antigo. */
+  relatorio(dias: number): Promise<DiaFechado[]>;
   abrir(comando: AbrirDia): Promise<DiaVenda>;
   fechar(diaId: string): Promise<void>;
 }

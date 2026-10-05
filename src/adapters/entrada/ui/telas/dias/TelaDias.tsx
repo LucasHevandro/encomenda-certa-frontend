@@ -18,6 +18,9 @@ export function TelaDias() {
           Abrir novo dia
         </LinkBotao>
       </header>
+      <LinkBotao href="/dias/relatorio" variante="secundario" tamanho="md" icone="producao" className="-mt-3 self-start">
+        Relatório entre dias
+      </LinkBotao>
 
       {dias.isPending ? (
         <Carregando />
