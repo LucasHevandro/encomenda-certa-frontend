@@ -28,7 +28,7 @@ O que o front espera da API:
 - Dinheiro sempre em centavos (inteiro).
 - `GET /dias/:id/eventos` (SSE) com os eventos `disponibilidade-mudou` e `unidades-liberadas` (`{ produtoId, quantidade }`).
 
-As rotas estão em `src/adapters/saida/http/GatewaysHttp.ts`, uma classe por porta.
+As rotas estão em `src/adapters/saida/http/GatewaysHttp.ts`, uma classe por porta, e usam os tipos gerados do contrato da API (`schema.d.ts`). Depois de mudar a API, rode `pnpm openapi` no backend e `pnpm api:tipos` aqui: o TypeScript aponta o que deixou de bater.
 
 ## Estrutura
 

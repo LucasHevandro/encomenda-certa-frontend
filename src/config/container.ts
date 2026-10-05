@@ -1,3 +1,4 @@
+import { ApiTipada } from "@/adapters/saida/http/apiTipada";
 import { ClienteApi } from "@/adapters/saida/http/cliente";
 import {
   ClientesHttp,
@@ -62,7 +63,7 @@ export function urlDaApi(configurada: string, paginaHost?: string): string {
 function criarSaida() {
   const urlApi = process.env.NEXT_PUBLIC_API_URL;
   if (!urlApi) return criarAdaptadoresEmMemoria({ atrasoMs: 250, aoMudarSessao: gravarCookieDeSessao });
-  const api = new ClienteApi(urlDaApi(urlApi, typeof window === "undefined" ? undefined : window.location.hostname));
+  const api = new ApiTipada(new ClienteApi(urlDaApi(urlApi, typeof window === "undefined" ? undefined : window.location.hostname)));
   return {
     dias: new DiasHttp(api),
     pedidos: new PedidosHttp(api),

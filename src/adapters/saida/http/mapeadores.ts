@@ -1,25 +1,19 @@
 import { centavos, type Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
 import type { Produto } from "@/core/domain/produto/Produto";
+import type { Esquema } from "./apiTipada";
 
 /**
- * Formato das respostas da API (JSON). Dinheiro chega em centavos (inteiro).
- * Os mapeadores marcam os valores com o tipo do domínio e conferem o que importa.
+ * Respostas da API (tipos gerados do openapi.json) → objetos do domínio.
+ * Dinheiro chega em centavos (inteiro) e ganha a marca do tipo Dinheiro aqui.
  */
-export interface PedidoApi extends Omit<Pedido, "itens"> {
-  itens: { produtoId: string; nome: string; quantidade: number; precoUnitario: number }[];
-}
-
-export interface ProdutoApi extends Omit<Produto, "preco"> {
-  preco: number;
-}
 
 export const dinheiro = (valor: number): Dinheiro => centavos(valor);
 
-export function paraPedido(api: PedidoApi): Pedido {
+export function paraPedido(api: Esquema<"Pedido">): Pedido {
   return { ...api, itens: api.itens.map((i) => ({ ...i, precoUnitario: dinheiro(i.precoUnitario) })) };
 }
 
-export function paraProduto(api: ProdutoApi): Produto {
+export function paraProduto(api: Esquema<"Produto">): Produto {
   return { ...api, preco: dinheiro(api.preco) };
 }

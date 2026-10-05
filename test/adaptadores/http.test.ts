@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ApiTipada } from "@/adapters/saida/http/apiTipada";
 import { ClienteApi } from "@/adapters/saida/http/cliente";
 import { PedidosHttp, SessaoHttp } from "@/adapters/saida/http/GatewaysHttp";
 import { EventosSSE } from "@/adapters/saida/tempo-real/EventosSSE";
@@ -14,7 +15,7 @@ function apiFalsa(status: number, corpo: unknown) {
     chamadas.push({ url, init });
     return new Response(corpo === undefined ? null : JSON.stringify(corpo), { status, headers: { "Content-Type": "application/json" } });
   }) as typeof fetch;
-  return { api: new ClienteApi("https://api.teste", buscar), chamadas };
+  return { api: new ApiTipada(new ClienteApi("https://api.teste", buscar)), chamadas };
 }
 
 describe("PedidosHttp", () => {
