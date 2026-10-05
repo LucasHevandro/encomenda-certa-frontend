@@ -66,7 +66,8 @@ export function TelaProducao({ diaId }: { diaId: string }) {
   const aberto = estaAberto(dia);
   const valor = (e: EstoqueDoProduto) => novas[e.produtoId] ?? e.producao;
   const abaixo = linhas.filter((e) => valor(e) < minimoPermitido(e));
-  const mudou = linhas.some((e) => valor(e) !== e.producao);
+  const alterados = linhas.filter((e) => valor(e) !== e.producao).length;
+  const mudou = alterados > 0;
   const nomes = new Map(linhas.map((e) => [e.produtoId, e.nome]));
 
   function confirmar() {
@@ -108,9 +109,10 @@ export function TelaProducao({ diaId }: { diaId: string }) {
                   invalido ? "border-[1.5px] border-alerta" : "border-line",
                 )}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-col">
-                    <h3 className="m-0 font-display text-titulo">{estoque.nome}</h3>
+                {/* Nome à esquerda e seletor à direita, sempre na mesma linha; nome longo quebra em duas. */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 flex-col">
+                    <h3 className="m-0 font-display text-titulo break-words">{estoque.nome}</h3>
                     {nova !== estoque.producao && (
                       <span className="text-rotulo font-normal text-ink-muted">
                         Era {estoque.producao}, vai para {nova}
@@ -118,6 +120,7 @@ export function TelaProducao({ diaId }: { diaId: string }) {
                     )}
                   </div>
                   <Quantidade
+                    className="shrink-0"
                     rotulo={`Produção de ${estoque.nome}`}
                     valor={nova}
                     aoMudar={(n) => {
@@ -170,11 +173,24 @@ export function TelaProducao({ diaId }: { diaId: string }) {
       )}
 
       {aberto && (
-        <div className="sticky bottom-24 z-10 desktop:bottom-4">
-          <Botao bloco icone="check" disabled={!online || !mudou || abaixo.length > 0 || salvar.isPending} onClick={confirmar} className="shadow-flutuante">
-            {salvar.isPending ? "Salvando…" : "Salvar produção"}
-          </Botao>
-        </div>
+        // Só aparece com mudança para salvar: um painel sólido acima da barra de baixo, como no novo pedido.
+        mudou && (
+          <div className="sticky bottom-[calc(88px+env(safe-area-inset-bottom))] z-20 flex flex-col gap-2 rounded-lg border border-line bg-surface-raised p-3 shadow-flutuante desktop:bottom-4">
+            <p className="m-0 text-rotulo font-normal text-ink-muted">
+              {abaixo.length > 0
+                ? "Ajuste os produtos marcados antes de salvar."
+                : `${alterados === 1 ? "1 produto alterado" : `${alterados} produtos alterados`}. Vale para todos os aparelhos ao salvar.`}
+            </p>
+            <div className="flex gap-2">
+              <Botao variante="fantasma" tamanho="md" onClick={() => setNovas({})} disabled={salvar.isPending}>
+                Desfazer
+              </Botao>
+              <Botao icone="check" className="grow" disabled={!online || abaixo.length > 0 || salvar.isPending} onClick={confirmar}>
+                {salvar.isPending ? "Salvando…" : "Salvar produção"}
+              </Botao>
+            </div>
+          </div>
+        )
       )}
 
       <Secao titulo="Alterações">
