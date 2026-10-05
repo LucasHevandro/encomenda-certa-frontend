@@ -49,7 +49,7 @@ export function BarraNavegacao({
           <span
             className={cx(
               "grid h-[30px] w-14 place-items-center rounded-full desktop:h-auto desktop:w-auto",
-              marcado && "bg-brasa-soft desktop:bg-transparent",
+              marcado && !fab && "bg-brasa-soft desktop:bg-transparent",
               fab && "-mt-7 size-16 bg-brasa text-on-brasa shadow-flutuante desktop:mt-0 desktop:size-auto desktop:shadow-none",
             )}
           >

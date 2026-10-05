@@ -257,8 +257,8 @@ export function TelaNovoPedido({
         </Aviso>
       )}
 
-      <Cartao className="flex flex-col gap-3">
-        {itens.length > 0 && (
+      {itens.length > 0 && (
+        <Cartao>
           <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {itens.map((i) => (
               <li key={i.produtoId} className="flex justify-between gap-3">
@@ -267,17 +267,23 @@ export function TelaNovoPedido({
               </li>
             ))}
           </ul>
-        )}
-        <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
-          <span className="text-ink-muted">Retirada {dataCurta(dia.data)}</span>
-          <span className="font-display text-numero-lg tabular-nums">{dinheiro(total)}</span>
+        </Cartao>
+      )}
+
+      {/* Total e "Confirmar reserva" ficam presos acima da barra de baixo, ao alcance do polegar. */}
+      <div className="sticky bottom-[calc(88px+env(safe-area-inset-bottom))] z-20 flex flex-col gap-2 rounded-lg border border-line bg-surface-raised p-3 shadow-flutuante desktop:bottom-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex min-w-0 flex-col">
+            <span className="text-legenda text-ink-muted">Retirada {dataCurta(dia.data)}</span>
+            <span className="font-display text-titulo whitespace-nowrap tabular-nums">{dinheiro(total)}</span>
+          </div>
+          <Botao onClick={() => confirmar()} disabled={!podeEnviar} icone="check" className="grow px-4">
+            {criar.isPending ? "Reservando…" : "Confirmar reserva"}
+          </Botao>
         </div>
         {erroGeral && <p role="alert" className="m-0 text-legenda font-semibold text-critico">{erroGeral}</p>}
-        <Botao bloco onClick={() => confirmar()} disabled={!podeEnviar} icone="check">
-          {criar.isPending ? "Reservando…" : "Confirmar reserva"}
-        </Botao>
         {!online && <p className="m-0 text-center text-legenda text-critico">Sem conexão: não dá para reservar agora.</p>}
-      </Cartao>
+      </div>
 
       <LinkBotao href={`/dias/${diaId}`} variante="fantasma" bloco>
         Voltar ao início

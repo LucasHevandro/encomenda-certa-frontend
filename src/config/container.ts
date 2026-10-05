@@ -41,11 +41,22 @@ function gravarCookieDeSessao(usuario: Usuario | null) {
     : `${COOKIE_SESSAO}=; path=/; max-age=0; samesite=lax`;
 }
 
+/**
+ * Em desenvolvimento a API costuma estar em "localhost". Aberto no celular pelo IP do computador
+ * (ex.: http://192.168.0.10:3000), "localhost" seria o próprio celular: troca pelo endereço da página.
+ */
+export function urlDaApi(configurada: string, paginaHost?: string): string {
+  const url = new URL(configurada);
+  const local = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (local && paginaHost && !["localhost", "127.0.0.1", "[::1]"].includes(paginaHost)) url.hostname = paginaHost;
+  return url.toString().replace(/\/$/, "");
+}
+
 /** Com NEXT_PUBLIC_API_URL usa a API e o SSE; sem ela, os adaptadores em memória. */
 function criarSaida() {
   const urlApi = process.env.NEXT_PUBLIC_API_URL;
   if (!urlApi) return criarAdaptadoresEmMemoria({ atrasoMs: 250, aoMudarSessao: gravarCookieDeSessao });
-  const api = new ClienteApi(urlApi.replace(/\/$/, ""));
+  const api = new ClienteApi(urlDaApi(urlApi, typeof window === "undefined" ? undefined : window.location.hostname));
   return {
     dias: new DiasHttp(api),
     pedidos: new PedidosHttp(api),
