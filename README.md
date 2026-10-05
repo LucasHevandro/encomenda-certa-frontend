@@ -13,6 +13,7 @@ Abra http://localhost:3000 e entre com qualquer e-mail e senha. Sem `NEXT_PUBLIC
 
 ```bash
 pnpm test      # Vitest: domínio, casos de uso, adaptadores e componentes
+pnpm test:e2e  # Playwright: fluxos do balcão no celular e no computador (usa o Chrome instalado)
 pnpm build     # build de produção, com o service worker (PWA)
 ```
 
