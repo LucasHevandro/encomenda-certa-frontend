@@ -25,7 +25,10 @@ jobs:
       - name: Lint
         run: pnpm lint
       - name: Tipos
-        run: pnpm exec tsc --noEmit
+        # Os tipos das rotas (PageProps, LayoutProps) são gerados pelo Next e não vão para o git.
+        run: |
+          pnpm exec next typegen
+          pnpm exec tsc --noEmit
       - name: Testes
         run: pnpm exec vitest run
       - name: Build
