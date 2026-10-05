@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      # Usa a versão do pnpm do campo "packageManager" do package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Tipos
+        run: pnpm exec tsc --noEmit
+      - name: Testes
+        run: pnpm exec vitest run
+      - name: Build
+        run: pnpm build
+        env:
+          # Build com a API ligada, como em produção.
+          NEXT_PUBLIC_API_URL: /api
+          API_INTERNA: http://localhost:3333
