@@ -23,7 +23,7 @@ export function BarraNavegacao({
   ativo,
   links,
   aoAbrirMais,
-  titulo = "Expresso café",
+  titulo = "Encomenda Certa",
 }: {
   /** Nome do estabelecimento, no topo da coluna lateral do desktop. */
   titulo?: ReactNode;

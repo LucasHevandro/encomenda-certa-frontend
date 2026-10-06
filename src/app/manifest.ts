@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 /** Instala na tela do celular e do tablet do balcão. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Expresso café",
-    short_name: "Expresso",
-    description: "Pedidos e produção dos assados, num lugar só",
+    name: "Encomenda Certa",
+    short_name: "Encomenda Certa",
+    description: "Encomendas e produção, num lugar só",
     lang: "pt-BR",
     start_url: "/dias",
     display: "standalone",

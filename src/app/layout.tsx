@@ -11,10 +11,10 @@ const display = Bricolage_Grotesque({ variable: "--fonte-display", subsets: ["la
 const sans = Figtree({ variable: "--fonte-sans", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  applicationName: "Expresso café",
-  title: "Expresso Café",
-  description: "Pedidos e produção dos assados, num lugar só",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Expresso" },
+  applicationName: "Encomenda Certa",
+  title: "Encomenda Certa",
+  description: "Encomendas e produção, num lugar só",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Encomenda Certa" },
   formatDetection: { telephone: false },
 };
 

@@ -1,6 +1,6 @@
-# Expresso café — frontend
+# Encomenda Certa — frontend
 
-Pedidos e produção dos assados, num lugar só. Next.js 16 (App Router), React 19, Tailwind 4, TanStack Query e Vitest, em arquitetura hexagonal.
+Encomendas e produção, num lugar só, para vários estabelecimentos. Next.js 16 (App Router), React 19, Tailwind 4, TanStack Query e Vitest, em arquitetura hexagonal.
 
 ## Rodar
 
