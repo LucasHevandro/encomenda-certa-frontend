@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { Aviso, Botao, Campo } from "../../componentes";
+import { Aviso, Botao, BotaoTema, Campo } from "../../componentes";
 import { mensagemDeErro } from "../../erros";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { useConexao } from "../../hooks/useConexao";
@@ -42,7 +42,8 @@ export function TelaEntrar({ proximo, aviso }: { proximo?: string; aviso?: strin
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-coluna flex-col justify-center gap-8 px-4 py-10">
+    <main className="relative mx-auto flex min-h-dvh w-full max-w-coluna flex-col justify-center gap-8 px-4 py-10">
+      <BotaoTema className="absolute top-2 right-1" />
       <header className="flex flex-col gap-1">
         <h1 className="m-0 font-display text-display">
           <NomeDoEstabelecimento />

@@ -1,6 +1,7 @@
 import { SerwistProvider } from "@serwist/turbopack/react";
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { SCRIPT_DO_TEMA } from "@/adapters/entrada/ui/tema";
 import { AplicarMarca } from "@/adapters/entrada/ui/telas/geral/Marca";
 import { ProvedorDependencias } from "@/config/ProvedorDependencias";
 import "../styles/tokens.css";
@@ -27,7 +28,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+    // suppressHydrationWarning: o script abaixo pode pôr data-theme no <html> antes de o React assumir.
+    <html lang="pt-BR" className={`${display.variable} ${sans.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        {/* Tema escolhido neste aparelho, aplicado antes da primeira pintura. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
+      </head>
       <body className="flex min-h-full flex-col bg-surface font-sans text-ink">
         <SerwistProvider swUrl="/serwist/sw.js" disable={process.env.NODE_ENV === "development"} reloadOnOnline={false}>
           <ProvedorDependencias>

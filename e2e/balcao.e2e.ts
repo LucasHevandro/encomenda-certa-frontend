@@ -178,6 +178,17 @@ test("administrador cria uma empresa com o primeiro acesso e desativa", async ({
   await expect(sol.getByText("Ativa", { exact: true })).toBeVisible();
 });
 
+test("tema escuro escolhido no aparelho fica guardado", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/entrar");
+  await page.getByRole("button", { name: "Tema escuro" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: "Tema claro" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
+
 test("nenhuma tela passa da largura do celular", async ({ page }, info) => {
   test.skip(info.project.name !== "celular", "só no celular");
   await entrar(page, "/dias");

@@ -2,6 +2,7 @@
 export { Aviso, type TomAviso } from "./Aviso";
 export { BarraNavegacao, type ItemNavegacao } from "./BarraNavegacao";
 export { Botao, classesBotao, type BotaoProps } from "./Botao";
+export { BotaoTema, useTema } from "./BotaoTema";
 export { Busca } from "./Busca";
 export { CabecalhoDia } from "./CabecalhoDia";
 export { Campo } from "./Campo";

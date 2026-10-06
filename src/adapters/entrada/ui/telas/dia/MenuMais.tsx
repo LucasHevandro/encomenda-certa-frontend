@@ -2,13 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { Folha, GrupoLista, ItemLista } from "../../componentes";
+import { Folha, GrupoLista, ItemLista, useTema } from "../../componentes";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 
 /** "Mais": o que não cabe na barra (espera, fechamento, dias, produtos, clientes). */
 export function MenuMais({ diaId, aberto, aoFechar }: { diaId: string; aberto: boolean; aoFechar: () => void }) {
   const router = useRouter();
   const { sessao } = useCasosDeUso();
+  const tema = useTema();
   const ir = useCallback(
     (href: string) => {
       aoFechar();
@@ -34,6 +35,12 @@ export function MenuMais({ diaId, aberto, aoFechar }: { diaId: string; aberto: b
           <ItemLista icone="cliente" titulo="Clientes" onClick={() => ir("/clientes")} />
           <ItemLista icone="cliente" titulo="Pessoas e senha" subtitulo="Quem tem acesso, trocar minha senha" onClick={() => ir("/pessoas")} />
           <ItemLista icone="menu" titulo="Configurações" subtitulo="Nome, cor, dias de venda, WhatsApp" onClick={() => ir("/configuracoes")} />
+          <ItemLista
+            icone={tema.proximo === "escuro" ? "lua" : "sol"}
+            titulo={tema.proximo === "escuro" ? "Tema escuro" : "Tema claro"}
+            subtitulo="Só neste aparelho"
+            onClick={tema.alternar}
+          />
           <ItemLista icone="fechar" titulo="Sair" onClick={sair} />
         </GrupoLista>
       </div>

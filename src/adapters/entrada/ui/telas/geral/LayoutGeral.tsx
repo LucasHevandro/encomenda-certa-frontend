@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { BotaoTema } from "../../componentes";
 import { cx } from "../../componentes/cx";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { NomeDoEstabelecimento } from "./Marca";
@@ -30,16 +31,17 @@ export function LayoutGeral({ children }: { children: ReactNode }) {
     <div className="flex min-h-dvh flex-col">
       {/* Celular: nome e Sair em cima, as abas dividindo a largura embaixo. Tablet em diante: uma linha só. */}
       <nav aria-label="Gestão" className="border-b border-line bg-surface-raised">
-        <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto] items-center px-4 tablet:flex tablet:gap-1 tablet:px-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto_auto] items-center px-4 tablet:flex tablet:gap-1 tablet:px-6">
           <NomeDoEstabelecimento className="min-w-0 py-3 font-display text-titulo whitespace-nowrap tablet:mr-3" />
+          <BotaoTema compacto className="tablet:order-last tablet:ml-auto" />
           <button
             type="button"
             onClick={sair}
-            className="flex min-h-12 cursor-pointer items-center px-3 text-rotulo whitespace-nowrap text-ink-muted tablet:order-last tablet:ml-auto"
+            className="flex min-h-12 cursor-pointer items-center px-3 text-rotulo whitespace-nowrap text-ink-muted tablet:order-last"
           >
             Sair
           </button>
-          <div className="col-span-2 -mx-4 grid grid-cols-5 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
+          <div className="col-span-3 -mx-4 grid grid-cols-5 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
             {LINKS.map((link) => {
               const ativo = caminho === link.href || caminho.startsWith(`${link.href}/`);
               return (
