@@ -15,16 +15,27 @@ const tentarDeNovo = (tentativas: number, erro: unknown) => !(erro instanceof Er
 export function ProvedorDependencias({ children }: { children: ReactNode }) {
   const [container] = useState(criarContainer);
   const [queryClient] = useState(() => {
-    // Sessão vencida em qualquer chamada: limpa o cookie e volta para o login.
+    // Sessão vencida ou empresa desativada: limpa o cookie e volta para o login.
+    // Administrador numa tela de empresa (ou o contrário): vai para o lugar certo.
+    // Recarrega de propósito: limpa o cache de todos os dados da sessão.
+    /* eslint-disable @next/next/no-location-assign-relative-destination */
     const aoErrar = (erro: unknown) => {
-      if (erro instanceof ErroDeDominio && erro.codigo === "sessao-expirada" && window.location.pathname !== ROTA_ENTRAR) {
+      if (!(erro instanceof ErroDeDominio) || window.location.pathname === ROTA_ENTRAR) return;
+      if (erro.codigo === "sessao-expirada") {
         container.casos.sessao.sair().finally(() => {
-          // Recarrega de propósito: limpa o cache de todos os dados da sessão vencida.
-          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
           window.location.href = `${ROTA_ENTRAR}?proximo=${encodeURIComponent(window.location.pathname)}`;
         });
+      } else if (erro.codigo === "empresa-inativa") {
+        container.casos.sessao.sair().finally(() => {
+          window.location.href = `${ROTA_ENTRAR}?aviso=empresa-inativa`;
+        });
+      } else if (erro.codigo === "so-empresa") {
+        window.location.href = "/admin";
+      } else if (erro.codigo === "so-administrador") {
+        window.location.href = "/dias";
       }
     };
+    /* eslint-enable @next/next/no-location-assign-relative-destination */
     return new QueryClient({
       queryCache: new QueryCache({ onError: aoErrar }),
       mutationCache: new MutationCache({ onError: aoErrar }),

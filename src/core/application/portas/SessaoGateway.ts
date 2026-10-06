@@ -2,6 +2,8 @@ export interface Usuario {
   readonly id: string;
   readonly nome: string;
   readonly email: string;
+  /** Administrador do sistema: só usa o painel de empresas. */
+  readonly administrador: boolean;
 }
 
 export interface SessaoGateway {

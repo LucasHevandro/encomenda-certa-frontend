@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NovaEntradaEspera } from "@/core/application/casos-de-uso/espera/ListaDeEspera";
 import type { NovaProducao } from "@/core/application/casos-de-uso/producao/SalvarProducao";
 import type { AbrirDia } from "@/core/application/portas/DiasGateway";
+import type { NovaEmpresa } from "@/core/application/portas/EmpresasGateway";
 import type { NovoPedido } from "@/core/application/portas/PedidosGateway";
 import type { NovoUsuario } from "@/core/application/portas/UsuariosGateway";
 import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
@@ -150,5 +151,23 @@ export function useSalvarProduto() {
       return produtos.ativar(acao.produtoId, acao.ativo);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.produtos() }),
+  });
+}
+
+export function useCriarEmpresa() {
+  const { empresas } = useCasosDeUso();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (nova: NovaEmpresa) => empresas.criar(nova),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.empresas() }),
+  });
+}
+
+export function useMudarEmpresa() {
+  const { empresas } = useCasosDeUso();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ativa }: { id: string; ativa: boolean }) => empresas.mudarAtiva(id, ativa),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.empresas() }),
   });
 }

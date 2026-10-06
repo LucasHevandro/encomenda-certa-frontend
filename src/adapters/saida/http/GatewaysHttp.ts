@@ -6,6 +6,7 @@ import type { EsperaGateway } from "@/core/application/portas/EsperaGateway";
 import type { FiltroPedidos, NovoPedido, PedidosGateway, ResultadoCancelamento } from "@/core/application/portas/PedidosGateway";
 import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/portas/ProducaoGateway";
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
+import type { Empresa, EmpresasGateway, NovaEmpresa } from "@/core/application/portas/EmpresasGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import type { PedidoDoHistorico } from "@/core/domain/cliente/Historico";
@@ -209,5 +210,21 @@ export class SessaoHttp implements SessaoGateway {
     } catch {
       return null;
     }
+  }
+}
+
+export class EmpresasHttp implements EmpresasGateway {
+  constructor(private readonly api: ApiTipada) {}
+
+  listar(): Promise<Empresa[]> {
+    return this.api.chamar("get", "/admin/empresas");
+  }
+
+  criar(nova: NovaEmpresa): Promise<{ empresa: Empresa; usuario: Usuario }> {
+    return this.api.chamar("post", "/admin/empresas", { corpo: nova });
+  }
+
+  mudarAtiva(id: string, ativa: boolean): Promise<Empresa> {
+    return this.api.chamar("patch", "/admin/empresas/{id}", { id, corpo: { ativa } });
   }
 }

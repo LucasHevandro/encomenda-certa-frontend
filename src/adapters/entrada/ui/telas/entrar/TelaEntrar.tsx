@@ -15,7 +15,12 @@ function destinoSeguro(proximo: string | undefined): string {
 }
 
 /** Login por pessoa, com sessão longa para não pedir senha no meio do domingo. */
-export function TelaEntrar({ proximo }: { proximo?: string }) {
+/** Avisos de quem foi mandado de volta para o login. */
+const AVISOS: Record<string, string> = {
+  "empresa-inativa": "O acesso deste estabelecimento foi desativado. Fale com o suporte.",
+};
+
+export function TelaEntrar({ proximo, aviso }: { proximo?: string; aviso?: string }) {
   const router = useRouter();
   const online = useConexao();
   const queryClient = useQueryClient();
@@ -24,9 +29,10 @@ export function TelaEntrar({ proximo }: { proximo?: string }) {
   const [senha, setSenha] = useState("");
   const entrar = useMutation({
     mutationFn: () => sessao.entrar(email, senha),
-    onSuccess: () => {
+    onSuccess: (usuario) => {
       queryClient.clear();
-      router.replace(destinoSeguro(proximo));
+      // O administrador do sistema não pertence a nenhuma empresa: vai direto para o painel.
+      router.replace(usuario.administrador ? "/admin" : destinoSeguro(proximo));
     },
   });
 
@@ -47,6 +53,7 @@ export function TelaEntrar({ proximo }: { proximo?: string }) {
         <Campo rotulo="E-mail" type="email" autoComplete="username" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <Campo rotulo="Senha" type="password" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
         {entrar.isError && <Aviso tom="critico">{mensagemDeErro(entrar.error)}</Aviso>}
+        {!entrar.isError && aviso && AVISOS[aviso] && <Aviso tom="alerta">{AVISOS[aviso]}</Aviso>}
         {!online && <Aviso tom="alerta">Sem conexão. Confira a internet para entrar.</Aviso>}
         <Botao type="submit" bloco disabled={entrar.isPending || !online}>
           {entrar.isPending ? "Entrando…" : "Entrar"}

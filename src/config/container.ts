@@ -4,6 +4,7 @@ import {
   ClientesHttp,
   ConfiguracaoHttp,
   DiasHttp,
+  EmpresasHttp,
   EsperaHttp,
   PedidosHttp,
   ProducaoHttp,
@@ -17,6 +18,7 @@ import type { Usuario } from "@/core/application/portas/SessaoGateway";
 import { COOKIE_SESSAO } from "./sessao";
 import { MensageiroWhatsApp } from "@/adapters/saida/whatsapp/MensageiroWhatsApp";
 import { GerenciarConfiguracao } from "@/core/application/casos-de-uso/configuracao/GerenciarConfiguracao";
+import { GerenciarEmpresas } from "@/core/application/casos-de-uso/auth/GerenciarEmpresas";
 import { GerenciarUsuarios } from "@/core/application/casos-de-uso/auth/GerenciarUsuarios";
 import { Sessao } from "@/core/application/casos-de-uso/auth/Sessao";
 import { BuscarClientes } from "@/core/application/casos-de-uso/clientes/BuscarClientes";
@@ -75,6 +77,7 @@ function criarSaida() {
     espera: new EsperaHttp(api),
     sessao: new SessaoHttp(api),
     usuarios: new UsuariosHttp(api),
+    empresas: new EmpresasHttp(api),
     configuracao: new ConfiguracaoHttp(api),
     eventos: new EventosSSE(api.baseUrl),
   };
@@ -93,6 +96,7 @@ export function criarContainer() {
     casos: {
       sessao: new Sessao(saida.sessao),
       usuarios: new GerenciarUsuarios(saida.usuarios),
+      empresas: new GerenciarEmpresas(saida.empresas),
       configuracao: new GerenciarConfiguracao(saida.configuracao),
       listarDias: new ListarDias(saida.dias),
       abrirDia: new AbrirDiaVenda(saida.dias),

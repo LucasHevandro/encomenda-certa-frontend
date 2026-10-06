@@ -7,6 +7,7 @@ import type { Mensageiro } from "@/core/application/portas/Mensageiro";
 import type { FiltroPedidos, NovoPedido, PedidosGateway, ResultadoCancelamento } from "@/core/application/portas/PedidosGateway";
 import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/portas/ProducaoGateway";
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
+import type { Empresa, EmpresasGateway, NovaEmpresa } from "@/core/application/portas/EmpresasGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import type { ConfiguracaoGateway } from "@/core/application/portas/ConfiguracaoGateway";
 import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
@@ -390,7 +391,7 @@ export class EsperaEmMemoria implements EsperaGateway {
 }
 
 export class SessaoEmMemoria implements SessaoGateway {
-  private usuario: Usuario | null = { id: "u1", nome: "Você", email: "voce@expressocafe.com" };
+  private usuario: Usuario | null = { id: "u1", nome: "Você", email: "voce@expressocafe.com", administrador: false };
 
   /** `aoMudar` deixa o container imitar o cookie que a API real grava, para o proxy.ts funcionar igual. */
   constructor(
@@ -403,7 +404,9 @@ export class SessaoEmMemoria implements SessaoGateway {
     if (!email.includes("@") || senha === "") {
       throw new ErroDeDominio("login-invalido", "E-mail ou senha incorretos.");
     }
-    this.usuario = { id: "u1", nome: email.split("@")[0], email };
+    // Sem API, quem entra com um e-mail "admin@…" vira o administrador do sistema (painel de empresas).
+    const administrador = email.startsWith("admin@");
+    this.usuario = { id: administrador ? "admin" : "u1", nome: email.split("@")[0], email, administrador };
     this.aoMudar(this.usuario);
     return this.usuario;
   }
@@ -431,7 +434,7 @@ export class UsuariosEmMemoria implements UsuariosGateway {
     if (this.banco.usuarios.some((u) => u.email === email)) {
       throw new ErroDeDominio("email-ja-existe", "Já existe um usuário com esse e-mail.");
     }
-    const usuario = { id: crypto.randomUUID(), nome, email };
+    const usuario = { id: crypto.randomUUID(), nome, email, administrador: false };
     this.banco.usuarios.push(usuario);
     return usuario;
   }
@@ -472,5 +475,33 @@ export class MensageiroEmMemoria implements Mensageiro {
 
   enviarConfirmacao(pedido: Pedido, dia: DiaVenda, configuracao: Configuracao): void {
     this.enviadas.push({ pedido, dia, configuracao });
+  }
+}
+
+export class EmpresasEmMemoria implements EmpresasGateway {
+  constructor(private readonly banco: BancoEmMemoria) {}
+
+  async listar(): Promise<Empresa[]> {
+    await this.banco.esperar();
+    return [...this.banco.empresas].sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+
+  async criar({ nome, usuario }: NovaEmpresa): Promise<{ empresa: Empresa; usuario: Usuario }> {
+    await this.banco.esperar();
+    if (this.banco.usuarios.some((u) => u.email === usuario.email)) {
+      throw new ErroDeDominio("email-ja-existe", "Já existe um usuário com esse e-mail.");
+    }
+    const empresa: Empresa = { id: crypto.randomUUID(), nome, ativa: true, criadaEm: new Date().toISOString(), usuarios: 1 };
+    this.banco.empresas.push(empresa);
+    return { empresa, usuario: { id: crypto.randomUUID(), nome: usuario.nome, email: usuario.email, administrador: false } };
+  }
+
+  async mudarAtiva(id: string, ativa: boolean): Promise<Empresa> {
+    await this.banco.esperar();
+    const atual = this.banco.empresas.find((e) => e.id === id);
+    if (!atual) throw new ErroDeDominio("nao-encontrado", "Empresa não encontrada.");
+    const nova = { ...atual, ativa };
+    this.banco.empresas = this.banco.empresas.map((e) => (e.id === id ? nova : e));
+    return nova;
   }
 }

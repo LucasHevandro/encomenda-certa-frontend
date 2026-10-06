@@ -98,3 +98,8 @@ export function useClientePorTelefone(telefone: string) {
     staleTime: 60_000,
   });
 }
+
+export function useEmpresas() {
+  const { empresas } = useCasosDeUso();
+  return useQuery({ queryKey: chaves.empresas(), queryFn: () => empresas.listar() });
+}

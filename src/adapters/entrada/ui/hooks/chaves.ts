@@ -15,6 +15,7 @@ export const chaves = {
   fechamento: (diaId: string) => ["dia", diaId, "fechamento"] as const,
   produtos: () => ["produtos"] as const,
   usuarios: () => ["usuarios"] as const,
+  empresas: () => ["empresas"] as const,
   clientes: () => ["clientes"] as const,
   cliente: (clienteId: string) => ["clientes", "historico", clienteId] as const,
   clientePorTelefone: (digitos: string) => ["clientes", "telefone", digitos] as const,

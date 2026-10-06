@@ -163,7 +163,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Configurações do estabelecimento */
+        /** Configurações do estabelecimento (sem login, os padrões) */
         get: {
             parameters: {
                 query?: never;
@@ -1465,6 +1465,135 @@ export interface paths {
         };
         trace?: never;
     };
+    "/admin/empresas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Empresas (administrador) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Empresa"][];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Criar empresa com o primeiro acesso (administrador) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NovaEmpresa"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EmpresaCriada"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/empresas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Ativar ou desativar empresa (administrador) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MudarEmpresa"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Empresa"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1497,6 +1626,20 @@ export interface components {
             id: string;
             nome: string;
             email: string;
+            /** @description Administrador do sistema: só usa o painel de empresas */
+            administrador: boolean;
+        };
+        Empresa: {
+            id: string;
+            nome: string;
+            ativa: boolean;
+            criadaEm: string;
+            /** @description Pessoas com acesso */
+            usuarios: number;
+        };
+        EmpresaCriada: {
+            empresa: components["schemas"]["Empresa"];
+            usuario: components["schemas"]["Usuario"];
         };
         Produto: {
             id: string;
@@ -1732,6 +1875,17 @@ export interface components {
         MudarEspera: {
             /** @enum {string} */
             status: "aguardando" | "atendido" | "desistiu";
+        };
+        NovaEmpresa: {
+            nome: string;
+            usuario: {
+                nome: string;
+                email: string;
+                senha: string;
+            };
+        };
+        MudarEmpresa: {
+            ativa: boolean;
         };
     };
     responses: never;

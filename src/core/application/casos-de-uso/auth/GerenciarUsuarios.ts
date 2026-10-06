@@ -11,13 +11,8 @@ export class GerenciarUsuarios {
     return this.usuarios.listar();
   }
 
-  criar({ nome, email, senha }: NovoUsuario): Promise<Usuario> {
-    const nomeLimpo = nome.trim();
-    const emailLimpo = email.trim().toLowerCase();
-    if (nomeLimpo === "") throw new ErroDeDominio("usuario-sem-nome", "Informe o nome da pessoa.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) throw new ErroDeDominio("email-invalido", "Informe um e-mail válido.");
-    validarSenha(senha);
-    return this.usuarios.criar({ nome: nomeLimpo, email: emailLimpo, senha });
+  criar(novo: NovoUsuario): Promise<Usuario> {
+    return this.usuarios.criar(prepararNovoUsuario(novo));
   }
 
   mudarSenha(senhaAtual: string, novaSenha: string, confirmacao: string): Promise<void> {
@@ -26,6 +21,16 @@ export class GerenciarUsuarios {
     if (novaSenha !== confirmacao) throw new ErroDeDominio("senhas-diferentes", "A confirmação não é igual à nova senha.");
     return this.usuarios.mudarSenha(senhaAtual, novaSenha);
   }
+}
+
+/** Confere e limpa nome, e-mail e senha; também usado no primeiro acesso de uma empresa. */
+export function prepararNovoUsuario({ nome, email, senha }: NovoUsuario): NovoUsuario {
+  const nomeLimpo = nome.trim();
+  const emailLimpo = email.trim().toLowerCase();
+  if (nomeLimpo === "") throw new ErroDeDominio("usuario-sem-nome", "Informe o nome da pessoa.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) throw new ErroDeDominio("email-invalido", "Informe um e-mail válido.");
+  validarSenha(senha);
+  return { nome: nomeLimpo, email: emailLimpo, senha };
 }
 
 function validarSenha(senha: string) {

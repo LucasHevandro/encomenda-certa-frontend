@@ -1,5 +1,7 @@
 import type { AlteracaoProducao } from "@/core/application/portas/ProducaoGateway";
 import type { ClienteEncontrado } from "@/core/application/portas/ClientesGateway";
+import type { Empresa } from "@/core/application/portas/EmpresasGateway";
+import type { Usuario } from "@/core/application/portas/SessaoGateway";
 import type { EventoDoDia } from "@/core/application/portas/EventosTempoReal";
 import type { SugestaoProducao } from "@/core/application/portas/DiasGateway";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
@@ -17,7 +19,9 @@ import type { Produto } from "@/core/domain/produto/Produto";
 export class BancoEmMemoria {
   configuracao: Configuracao = CONFIGURACAO_PADRAO;
   produtos: Produto[] = [];
-  usuarios: { id: string; nome: string; email: string }[] = [];
+  usuarios: Usuario[] = [];
+  /** Só o painel do administrador usa; o resto do modo memória é uma empresa só. */
+  empresas: Empresa[] = [];
   dias: DiaVenda[] = [];
   /** diaId → (produtoId → quantidade produzida). */
   producao = new Map<string, Map<string, number>>();

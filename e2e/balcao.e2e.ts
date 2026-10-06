@@ -153,10 +153,35 @@ test("configurações mudam o nome, os dias de venda e a mensagem", async ({ pag
   await expect(page.getByText("Dias de venda: sábado.")).toBeVisible();
 });
 
+test("administrador cria uma empresa com o primeiro acesso e desativa", async ({ page }) => {
+  await page.goto("/entrar");
+  await page.getByLabel("E-mail").fill("admin@sistema.com");
+  await page.getByLabel("Senha").fill("qualquer");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByRole("heading", { name: "Empresas" })).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Expresso café" })).toBeVisible();
+
+  await page.getByLabel("Nome do estabelecimento").fill("Padaria Sol");
+  await page.getByLabel("Nome da pessoa").fill("Bia");
+  await page.getByLabel("E-mail").fill("bia@sol.com");
+  await page.getByLabel("Senha inicial").fill("senha-da-bia");
+  await page.getByRole("button", { name: "Criar empresa" }).click();
+  await expect(page.getByText("Bia já pode entrar em Padaria Sol com bia@sol.com")).toBeVisible();
+
+  const sol = page.getByRole("listitem").filter({ hasText: "Padaria Sol" });
+  await expect(sol.getByText("Ativa", { exact: true })).toBeVisible();
+  await sol.getByRole("button", { name: "Desativar" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Desativar" }).click();
+  await expect(sol.getByText("Desativada", { exact: true })).toBeVisible();
+  await sol.getByRole("button", { name: "Reativar" }).click();
+  await expect(sol.getByText("Ativa", { exact: true })).toBeVisible();
+});
+
 test("nenhuma tela passa da largura do celular", async ({ page }, info) => {
   test.skip(info.project.name !== "celular", "só no celular");
   await entrar(page, "/dias");
-  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/dias/relatorio", "/produtos", "/clientes", "/clientes/c1", "/pessoas", "/configuracoes"];
+  const telas = [`/dias/${DIA}`, `/dias/${DIA}/pedidos`, `/dias/${DIA}/pedidos/novo`, `/dias/${DIA}/producao`, `/dias/${DIA}/espera`, `/dias/${DIA}/fechamento`, "/dias", "/dias/relatorio", "/produtos", "/clientes", "/clientes/c1", "/pessoas", "/configuracoes", "/admin"];
   for (const tela of telas) {
     // O cookie de sessão continua depois do login, então dá para abrir cada tela direto.
     await page.goto(tela);
