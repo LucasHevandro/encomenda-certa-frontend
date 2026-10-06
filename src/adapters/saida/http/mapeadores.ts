@@ -1,4 +1,5 @@
 import { centavos, type Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
+import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
 import type { Produto } from "@/core/domain/produto/Produto";
 import type { Esquema } from "./apiTipada";
@@ -12,6 +13,10 @@ export const dinheiro = (valor: number): Dinheiro => centavos(valor);
 
 export function paraPedido(api: Esquema<"Pedido">): Pedido {
   return { ...api, itens: api.itens.map((i) => ({ ...i, precoUnitario: dinheiro(i.precoUnitario) })) };
+}
+
+export function paraConfiguracao(api: Esquema<"Configuracao">): Configuracao {
+  return api;
 }
 
 export function paraProduto(api: Esquema<"Produto">): Produto {

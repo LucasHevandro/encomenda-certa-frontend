@@ -21,7 +21,8 @@ import { mensagemDeErro } from "../../erros";
 import { dataCurta, dataIso, diaDaSemana } from "../../formatos";
 import { useAbrirDia } from "../../hooks/acoes";
 import { chaves } from "../../hooks/chaves";
-import { useProdutos } from "../../hooks/consultas";
+import { useConfiguracao, useProdutos } from "../../hooks/consultas";
+import { descreverDias } from "@/core/domain/configuracao/Configuracao";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { useConexao } from "../../hooks/useConexao";
 
@@ -38,8 +39,12 @@ export function TelaNovoDia() {
   const online = useConexao();
   const { abrirDia } = useCasosDeUso();
   const produtos = useProdutos();
-  const pronto = useQuery({ queryKey: chaves.prontoParaAbrir(), queryFn: () => abrirDia.preparar(dataIso(new Date())) });
-  const abrir = useAbrirDia(pronto.data?.existentes ?? []);
+  const { diasDeVenda } = useConfiguracao();
+  const pronto = useQuery({
+    queryKey: [...chaves.prontoParaAbrir(), diasDeVenda.join(",")],
+    queryFn: () => abrirDia.preparar(dataIso(new Date()), diasDeVenda),
+  });
+  const abrir = useAbrirDia(pronto.data?.existentes ?? [], diasDeVenda);
 
   const [data, setData] = useState<string | null>(null);
   const [base, setBase] = useState<Base>("ultimo");
@@ -89,7 +94,7 @@ export function TelaNovoDia() {
           setData(e.target.value);
           abrir.reset();
         }}
-        dica={dataEscolhida ? `${diaDaSemana(dataEscolhida)}. Vendemos aos sábados e domingos.` : undefined}
+        dica={dataEscolhida ? `${diaDaSemana(dataEscolhida)}. Dias de venda: ${descreverDias(diasDeVenda)}.` : undefined}
       />
 
       <Secao titulo="Produção">

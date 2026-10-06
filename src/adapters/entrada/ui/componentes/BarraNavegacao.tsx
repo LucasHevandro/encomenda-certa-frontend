@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { cx } from "./cx";
 import { Icone, type NomeIcone } from "./Icone";
 
@@ -22,7 +23,10 @@ export function BarraNavegacao({
   ativo,
   links,
   aoAbrirMais,
+  titulo = "Expresso café",
 }: {
+  /** Nome do estabelecimento, no topo da coluna lateral do desktop. */
+  titulo?: ReactNode;
   ativo?: ItemNavegacao;
   links: Record<Exclude<ItemNavegacao, "mais">, string>;
   aoAbrirMais: () => void;
@@ -35,7 +39,7 @@ export function BarraNavegacao({
         "desktop:inset-y-0 desktop:right-auto desktop:flex desktop:w-60 desktop:flex-col desktop:items-stretch desktop:gap-1 desktop:border-t-0 desktop:border-r desktop:px-3 desktop:pt-6 desktop:shadow-none",
       )}
     >
-      <p className="hidden px-3 pb-4 font-display text-titulo desktop:order-[-2] desktop:block">Expresso café</p>
+      <p className="hidden px-3 pb-4 font-display text-titulo desktop:order-[-2] desktop:block">{titulo}</p>
       {ITENS.map((item) => {
         const marcado = item.id === ativo;
         const fab = item.id === "novo";

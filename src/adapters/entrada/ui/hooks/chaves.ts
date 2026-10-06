@@ -1,6 +1,7 @@
 /** Chaves do cache do TanStack Query. Tudo de um dia começa com ["dia", diaId]. */
 export const chaves = {
   sessao: () => ["sessao"] as const,
+  configuracao: () => ["configuracao"] as const,
   dias: () => ["dias"] as const,
   relatorio: (dias: number) => ["dias", "relatorio", dias] as const,
   prontoParaAbrir: () => ["dias", "novo"] as const,

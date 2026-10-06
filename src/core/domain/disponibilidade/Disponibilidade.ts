@@ -29,10 +29,11 @@ export function disponiveis(estoque: EstoqueDoProduto): number {
   return Math.max(0, estoque.producao - comprometidos(estoque));
 }
 
-export function situacao(estoque: EstoqueDoProduto): Situacao {
+/** `limite` vem das configurações do estabelecimento (padrão 3). */
+export function situacao(estoque: EstoqueDoProduto, limite = LIMITE_ATENCAO): Situacao {
   const restantes = disponiveis(estoque);
   if (restantes === 0) return "esgotado";
-  if (restantes <= LIMITE_ATENCAO) return "atencao";
+  if (restantes <= limite) return "atencao";
   return "disponivel";
 }
 

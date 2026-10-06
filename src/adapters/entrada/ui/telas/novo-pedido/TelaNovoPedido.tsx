@@ -23,7 +23,7 @@ import {
 import { codigoDoErro, mensagemDeErro } from "../../erros";
 import { dataCurta, dataLonga, dinheiro, quantidadeDe } from "../../formatos";
 import { useAdicionarNaEspera, useCriarPedido, useMudarEspera } from "../../hooks/acoes";
-import { useClientePorTelefone, usePainel, useProdutos } from "../../hooks/consultas";
+import { useClientePorTelefone, useConfiguracao, usePainel, useProdutos } from "../../hooks/consultas";
 import { useConexao } from "../../hooks/useConexao";
 import { AvisoIndisponivel } from "./AvisoIndisponivel";
 import type { ExcessoPedido } from "./SeletorItens";
@@ -42,6 +42,7 @@ export function TelaNovoPedido({
   const painel = usePainel(diaId);
   const produtos = useProdutos();
   const online = useConexao();
+  const configuracao = useConfiguracao();
   const mudarEspera = useMudarEspera(diaId);
 
   const [telefone, setTelefone] = useState(inicial?.telefone ?? "");
@@ -222,6 +223,7 @@ export function TelaNovoPedido({
           <Vazio>Nenhum produto à venda neste dia.</Vazio>
         ) : (
           <SeletorItens
+            limiteAtencao={configuracao.limiteAtencao}
             estoques={ativos}
             precos={precos}
             quantidades={quantidades}

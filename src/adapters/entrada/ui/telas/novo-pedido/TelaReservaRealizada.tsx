@@ -4,11 +4,13 @@ import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import { type Pedido, totalDoItem, totalDoPedido } from "@/core/domain/pedido/Pedido";
 import { Botao, Cartao, Icone, LinkBotao, Pagina, Status } from "../../componentes";
 import { dataCurta, dinheiro, numeroPedido, quantidadeDe } from "../../formatos";
+import { useConfiguracao } from "../../hooks/consultas";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 
 /** "Reserva realizada!" é a única exclamação do produto. */
 export function TelaReservaRealizada({ pedido, dia, aoNovoPedido }: { pedido: Pedido; dia: DiaVenda; aoNovoPedido: () => void }) {
   const { enviarConfirmacao } = useCasosDeUso();
+  const configuracao = useConfiguracao();
 
   return (
     <Pagina>
@@ -41,7 +43,7 @@ export function TelaReservaRealizada({ pedido, dia, aoNovoPedido }: { pedido: Pe
       </Cartao>
 
       <div className="flex flex-col gap-2">
-        <Botao variante="secundario" bloco icone="mensagem" onClick={() => enviarConfirmacao.executar(pedido, dia)}>
+        <Botao variante="secundario" bloco icone="mensagem" onClick={() => enviarConfirmacao.executar(pedido, dia, configuracao)}>
           Enviar confirmação pelo WhatsApp
         </Botao>
         <LinkBotao href={`/dias/${dia.id}/pedidos/${pedido.id}`} bloco icone="pedidos">

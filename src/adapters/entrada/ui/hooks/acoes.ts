@@ -6,6 +6,7 @@ import type { NovaProducao } from "@/core/application/casos-de-uso/producao/Salv
 import type { AbrirDia } from "@/core/application/portas/DiasGateway";
 import type { NovoPedido } from "@/core/application/portas/PedidosGateway";
 import type { NovoUsuario } from "@/core/application/portas/UsuariosGateway";
+import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { EstoqueDoProduto, ItemSolicitado } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { Pagamento, Pedido } from "@/core/domain/pedido/Pedido";
@@ -73,6 +74,15 @@ export function useReativarPedido(diaId: string, estoquesNaTela?: readonly Estoq
   return useMutation({ mutationFn: (pedido: Pedido) => reativarPedido.executar(pedido, estoquesNaTela), onSuccess: () => recarregar(diaId) });
 }
 
+export function useSalvarConfiguracao() {
+  const { configuracao } = useCasosDeUso();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (nova: Configuracao) => configuracao.salvar(nova),
+    onSuccess: (salva) => queryClient.setQueryData(chaves.configuracao(), salva),
+  });
+}
+
 export function useCriarUsuario() {
   const { usuarios } = useCasosDeUso();
   const queryClient = useQueryClient();
@@ -115,11 +125,11 @@ export function useMudarEspera(diaId: string) {
   });
 }
 
-export function useAbrirDia(existentes: readonly string[]) {
+export function useAbrirDia(existentes: readonly string[], diasDeVenda?: readonly number[]) {
   const { abrirDia } = useCasosDeUso();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (comando: AbrirDia) => abrirDia.executar(comando, existentes),
+    mutationFn: (comando: AbrirDia) => abrirDia.executar(comando, existentes, diasDeVenda),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.dias() }),
   });
 }

@@ -8,6 +8,8 @@ import type { FiltroPedidos, NovoPedido, PedidosGateway, ResultadoCancelamento }
 import type { AlteracaoProducao, ProducaoGateway } from "@/core/application/portas/ProducaoGateway";
 import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
+import type { ConfiguracaoGateway } from "@/core/application/portas/ConfiguracaoGateway";
+import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import { centavos, type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
@@ -98,6 +100,7 @@ export class DiasEmMemoria implements DiasGateway {
     validarNovaData(
       comando.data,
       this.banco.dias.map((d) => d.data),
+      this.banco.configuracao.diasDeVenda,
     );
     const dia: DiaVenda = { id: comando.data, data: comando.data, status: "aberto" };
     this.banco.dias.push(dia);
@@ -190,6 +193,9 @@ export class PedidosEmMemoria implements PedidosGateway {
   async registrarPagamento(pedidoId: string, pagamento: Pagamento): Promise<Pedido> {
     await this.banco.esperar();
     const atual = this.buscar(pedidoId);
+    if (pagamento !== "pendente" && !this.banco.configuracao.formasDePagamento.includes(pagamento)) {
+      throw new ErroDeDominio("pagamento-nao-aceito", "Esta forma de pagamento não está ativa nas configurações.");
+    }
     return this.substituir({ ...atual, pagamento });
   }
 
@@ -437,6 +443,21 @@ export class UsuariosEmMemoria implements UsuariosGateway {
   }
 }
 
+export class ConfiguracaoEmMemoria implements ConfiguracaoGateway {
+  constructor(private readonly banco: BancoEmMemoria) {}
+
+  async obter(): Promise<Configuracao> {
+    await this.banco.esperar();
+    return this.banco.configuracao;
+  }
+
+  async salvar(configuracao: Configuracao): Promise<Configuracao> {
+    await this.banco.esperar();
+    this.banco.configuracao = configuracao;
+    return configuracao;
+  }
+}
+
 export class EventosEmMemoria implements EventosTempoReal {
   constructor(private readonly banco: BancoEmMemoria) {}
 
@@ -447,9 +468,9 @@ export class EventosEmMemoria implements EventosTempoReal {
 
 /** Guarda as mensagens em vez de abrir o WhatsApp. Útil em testes. */
 export class MensageiroEmMemoria implements Mensageiro {
-  readonly enviadas: { pedido: Pedido; dia: DiaVenda }[] = [];
+  readonly enviadas: { pedido: Pedido; dia: DiaVenda; configuracao: Configuracao }[] = [];
 
-  enviarConfirmacao(pedido: Pedido, dia: DiaVenda): void {
-    this.enviadas.push({ pedido, dia });
+  enviarConfirmacao(pedido: Pedido, dia: DiaVenda, configuracao: Configuracao): void {
+    this.enviadas.push({ pedido, dia, configuracao });
   }
 }

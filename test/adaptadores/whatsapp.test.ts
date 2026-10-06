@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { linkWhatsApp, MensageiroWhatsApp, montarConfirmacao } from "@/adapters/saida/whatsapp/MensageiroWhatsApp";
+import { CONFIGURACAO_PADRAO } from "@/core/domain/configuracao/Configuracao";
 import { centavos } from "@/core/domain/compartilhado/Dinheiro";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
 
@@ -31,7 +32,19 @@ describe("MensageiroWhatsApp", () => {
 
   it("chama quem abre o link", () => {
     const abertos: string[] = [];
-    new MensageiroWhatsApp((url) => abertos.push(url)).enviarConfirmacao(pedido, dia);
+    new MensageiroWhatsApp((url) => abertos.push(url)).enviarConfirmacao(pedido, dia, CONFIGURACAO_PADRAO);
     expect(abertos[0]).toMatch(/^https:\/\/wa\.me\/5544999999999\?text=/);
+  });
+});
+
+describe("mensagem configurável", () => {
+  it("usa o modelo, o nome e o endereço do estabelecimento", () => {
+    const texto = montarConfirmacao(pedido, dia, {
+      ...CONFIGURACAO_PADRAO,
+      nomeEstabelecimento: "Padaria Sol",
+      enderecoRetirada: "Rua das Flores, 10",
+      mensagemWhatsapp: "{cliente}, pedido {numero} na {estabelecimento}: {total}\nBuscar em {endereco}",
+    });
+    expect(texto).toBe("João, pedido #0258 na Padaria Sol: R$ 110,00\nBuscar em Rua das Flores, 10");
   });
 });

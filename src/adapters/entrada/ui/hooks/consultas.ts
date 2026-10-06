@@ -1,11 +1,22 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { CONFIGURACAO_PADRAO, type Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { FiltroPedidos } from "@/core/application/portas/PedidosGateway";
 import { chaves } from "./chaves";
 import { useCasosDeUso } from "./useCasosDeUso";
 
 /** A tela pede ao caso de uso; o TanStack Query guarda em cache e controla o carregamento. */
+
+/**
+ * Configurações do estabelecimento. Enquanto não chegam (ou sem conexão), valem os padrões,
+ * então as telas nunca esperam por elas.
+ */
+export function useConfiguracao(): Configuracao {
+  const { configuracao } = useCasosDeUso();
+  const { data } = useQuery({ queryKey: chaves.configuracao(), queryFn: () => configuracao.obter(), staleTime: 5 * 60_000 });
+  return data ?? CONFIGURACAO_PADRAO;
+}
 
 export function usePainel(diaId: string) {
   const { obterPainel } = useCasosDeUso();

@@ -7,6 +7,7 @@ import { Aviso, Botao, Campo } from "../../componentes";
 import { mensagemDeErro } from "../../erros";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { useConexao } from "../../hooks/useConexao";
+import { NomeDoEstabelecimento } from "../geral/Marca";
 
 /** Só aceita voltar para caminhos do próprio app. */
 function destinoSeguro(proximo: string | undefined): string {
@@ -37,8 +38,10 @@ export function TelaEntrar({ proximo }: { proximo?: string }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-coluna flex-col justify-center gap-8 px-4 py-10">
       <header className="flex flex-col gap-1">
-        <h1 className="m-0 font-display text-display">Expresso café</h1>
-        <p className="m-0 text-ink-muted">Pedidos e produção dos assados, num lugar só.</p>
+        <h1 className="m-0 font-display text-display">
+          <NomeDoEstabelecimento />
+        </h1>
+        <p className="m-0 text-ink-muted">Pedidos e produção, num lugar só.</p>
       </header>
       <form onSubmit={enviar} className="flex flex-col gap-4">
         <Campo rotulo="E-mail" type="email" autoComplete="username" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

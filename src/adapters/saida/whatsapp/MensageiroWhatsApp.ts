@@ -1,4 +1,5 @@
 import type { Mensageiro } from "@/core/application/portas/Mensageiro";
+import { CONFIGURACAO_PADRAO, type Configuracao, preencherMensagem } from "@/core/domain/configuracao/Configuracao";
 import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import { type Pedido, totalDoItem, totalDoPedido } from "@/core/domain/pedido/Pedido";
 
@@ -13,21 +14,18 @@ function quando(dia: DiaVenda): string {
   return `${DIAS[data.getDay()]}, ${String(d).padStart(2, "0")}/${String(mes).padStart(2, "0")}`;
 }
 
-/** Texto da confirmação. Emoji só aqui, nunca na interface. */
-export function montarConfirmacao(pedido: Pedido, dia: DiaVenda): string {
+/** Texto da confirmação pelo modelo das configurações. Emoji só aqui, nunca na interface. */
+export function montarConfirmacao(pedido: Pedido, dia: DiaVenda, configuracao: Configuracao = CONFIGURACAO_PADRAO): string {
   const itens = pedido.itens.map((i) => `• ${i.quantidade}x ${i.nome} — ${reais(totalDoItem(i))}`).join("\n");
-  return [
-    `Olá, ${pedido.cliente.nome}! 🍗`,
-    `Sua reserva no Expresso café está confirmada.`,
-    ``,
-    `*Pedido #${String(pedido.numero).padStart(4, "0")}*`,
+  return preencherMensagem(configuracao.mensagemWhatsapp, {
+    cliente: pedido.cliente.nome,
+    numero: `#${String(pedido.numero).padStart(4, "0")}`,
     itens,
-    ``,
-    `*Total: ${reais(totalDoPedido(pedido))}*`,
-    `Retirada: ${quando(dia)}`,
-    ``,
-    `Obrigado pela preferência!`,
-  ].join("\n");
+    total: reais(totalDoPedido(pedido)),
+    data: quando(dia),
+    estabelecimento: configuracao.nomeEstabelecimento,
+    endereco: configuracao.enderecoRetirada,
+  });
 }
 
 /** Link wa.me com o texto pronto. Sem telefone, o WhatsApp pergunta para quem enviar. */
@@ -41,7 +39,7 @@ export function linkWhatsApp(texto: string, telefone?: string): string {
 export class MensageiroWhatsApp implements Mensageiro {
   constructor(private readonly abrir: (url: string) => void = (url) => window.open(url, "_blank", "noopener")) {}
 
-  enviarConfirmacao(pedido: Pedido, dia: DiaVenda): void {
-    this.abrir(linkWhatsApp(montarConfirmacao(pedido, dia), pedido.cliente.telefone));
+  enviarConfirmacao(pedido: Pedido, dia: DiaVenda, configuracao: Configuracao): void {
+    this.abrir(linkWhatsApp(montarConfirmacao(pedido, dia, configuracao), pedido.cliente.telefone));
   }
 }

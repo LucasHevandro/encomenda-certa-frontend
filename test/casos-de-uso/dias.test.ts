@@ -23,7 +23,7 @@ describe("AbrirDiaVenda", () => {
   it("recusa dia útil e data repetida", async () => {
     const a = criarAdaptadoresEmMemoria();
     const caso = new AbrirDiaVenda(a.dias);
-    expect(() => caso.executar({ data: "2026-10-14", producao: [] })).toThrow("sábado ou um domingo");
+    expect(() => caso.executar({ data: "2026-10-14", producao: [] })).toThrow("sábado ou domingo");
     await expect(a.dias.abrir({ data: "2026-10-04", producao: [] })).rejects.toMatchObject({ codigo: "dia-ja-existe" });
   });
 });

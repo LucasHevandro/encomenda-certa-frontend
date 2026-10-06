@@ -20,12 +20,13 @@ import {
   Vazio,
 } from "../../componentes";
 import { dataLonga, dinheiro, dinheiroCurto, numeroPedido, quantidadeDe, rotuloDoDia } from "../../formatos";
-import { usePainel, usePedidos } from "../../hooks/consultas";
+import { useConfiguracao, usePainel, usePedidos } from "../../hooks/consultas";
 
 /** Início do dia: quanto ainda posso vender, quanto está reservado e quem ainda vai buscar. */
 export function TelaInicio({ diaId }: { diaId: string }) {
   const painel = usePainel(diaId);
   const pendentes = usePedidos(diaId, { retirada: "reservado" });
+  const { limiteAtencao } = useConfiguracao();
   const base = `/dias/${diaId}`;
 
   if (painel.isPending) {
@@ -112,7 +113,7 @@ export function TelaInicio({ diaId }: { diaId: string }) {
               {estoques.map((estoque) => {
                 const naFila = clientesAguardando[estoque.produtoId] ?? 0;
                 return (
-                  <CartaoProduto key={estoque.produtoId} nome={estoque.nome} producao={estoque.producao} reservados={estoque.reservados} vendidos={estoque.vendidos}>
+                  <CartaoProduto key={estoque.produtoId} limiteAtencao={limiteAtencao} nome={estoque.nome} producao={estoque.producao} reservados={estoque.reservados} vendidos={estoque.vendidos}>
                     {naFila > 0 && (
                       <Link href={`${base}/espera`} className="inline-flex">
                         <Status estado="espera">{naFila === 1 ? "1 cliente aguardando" : `${naFila} clientes aguardando`}</Status>

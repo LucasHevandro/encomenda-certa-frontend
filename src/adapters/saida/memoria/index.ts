@@ -3,6 +3,7 @@ import { BancoEmMemoria } from "./BancoEmMemoria";
 import { popularDadosIniciais } from "./dadosIniciais";
 import {
   ClientesEmMemoria,
+  ConfiguracaoEmMemoria,
   DiasEmMemoria,
   EsperaEmMemoria,
   EventosEmMemoria,
@@ -32,6 +33,7 @@ export function criarAdaptadoresEmMemoria({
     espera: new EsperaEmMemoria(banco),
     sessao: new SessaoEmMemoria(banco, aoMudarSessao),
     usuarios: new UsuariosEmMemoria(banco),
+    configuracao: new ConfiguracaoEmMemoria(banco),
     eventos: new EventosEmMemoria(banco),
     mensageiro: new MensageiroEmMemoria(),
   };

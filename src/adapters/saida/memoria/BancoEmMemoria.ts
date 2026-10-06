@@ -7,6 +7,7 @@ import type { DiaVenda } from "@/core/domain/dia-venda/DiaVenda";
 import type { EstoqueDoProduto } from "@/core/domain/disponibilidade/Disponibilidade";
 import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
+import { CONFIGURACAO_PADRAO, type Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { Produto } from "@/core/domain/produto/Produto";
 
 /**
@@ -14,6 +15,7 @@ import type { Produto } from "@/core/domain/produto/Produto";
  * Vive só na memória do navegador: recarregar a página volta aos dados iniciais.
  */
 export class BancoEmMemoria {
+  configuracao: Configuracao = CONFIGURACAO_PADRAO;
   produtos: Produto[] = [];
   usuarios: { id: string; nome: string; email: string }[] = [];
   dias: DiaVenda[] = [];

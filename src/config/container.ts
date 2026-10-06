@@ -2,6 +2,7 @@ import { ApiTipada } from "@/adapters/saida/http/apiTipada";
 import { ClienteApi } from "@/adapters/saida/http/cliente";
 import {
   ClientesHttp,
+  ConfiguracaoHttp,
   DiasHttp,
   EsperaHttp,
   PedidosHttp,
@@ -15,6 +16,7 @@ import { EventosSSE } from "@/adapters/saida/tempo-real/EventosSSE";
 import type { Usuario } from "@/core/application/portas/SessaoGateway";
 import { COOKIE_SESSAO } from "./sessao";
 import { MensageiroWhatsApp } from "@/adapters/saida/whatsapp/MensageiroWhatsApp";
+import { GerenciarConfiguracao } from "@/core/application/casos-de-uso/configuracao/GerenciarConfiguracao";
 import { GerenciarUsuarios } from "@/core/application/casos-de-uso/auth/GerenciarUsuarios";
 import { Sessao } from "@/core/application/casos-de-uso/auth/Sessao";
 import { BuscarClientes } from "@/core/application/casos-de-uso/clientes/BuscarClientes";
@@ -73,6 +75,7 @@ function criarSaida() {
     espera: new EsperaHttp(api),
     sessao: new SessaoHttp(api),
     usuarios: new UsuariosHttp(api),
+    configuracao: new ConfiguracaoHttp(api),
     eventos: new EventosSSE(api.baseUrl),
   };
 }
@@ -90,6 +93,7 @@ export function criarContainer() {
     casos: {
       sessao: new Sessao(saida.sessao),
       usuarios: new GerenciarUsuarios(saida.usuarios),
+      configuracao: new GerenciarConfiguracao(saida.configuracao),
       listarDias: new ListarDias(saida.dias),
       abrirDia: new AbrirDiaVenda(saida.dias),
       obterPainel: new ObterPainel(saida.dias),

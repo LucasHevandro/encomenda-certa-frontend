@@ -1,3 +1,5 @@
+import type { ConfiguracaoGateway } from "@/core/application/portas/ConfiguracaoGateway";
+import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { ClienteEncontrado, ClientesGateway } from "@/core/application/portas/ClientesGateway";
 import type { AbrirDia, DiasGateway, PainelDoDia, ResumoDia, SugestaoProducao } from "@/core/application/portas/DiasGateway";
 import type { EsperaGateway } from "@/core/application/portas/EsperaGateway";
@@ -15,7 +17,7 @@ import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import type { Pagamento, Pedido } from "@/core/domain/pedido/Pedido";
 import type { Produto } from "@/core/domain/produto/Produto";
 import type { ApiTipada } from "./apiTipada";
-import { dinheiro, paraPedido, paraProduto } from "./mapeadores";
+import { dinheiro, paraConfiguracao, paraPedido, paraProduto } from "./mapeadores";
 
 /**
  * Implementações das portas com a API. As rotas e os formatos vêm do openapi.json do
@@ -173,6 +175,19 @@ export class UsuariosHttp implements UsuariosGateway {
 
   async mudarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
     await this.api.chamar("put", "/sessao/senha", { corpo: { senhaAtual, novaSenha } });
+  }
+}
+
+export class ConfiguracaoHttp implements ConfiguracaoGateway {
+  constructor(private readonly api: ApiTipada) {}
+
+  async obter(): Promise<Configuracao> {
+    return paraConfiguracao(await this.api.chamar("get", "/configuracao"));
+  }
+
+  async salvar(configuracao: Configuracao): Promise<Configuracao> {
+    const corpo = { ...configuracao, diasDeVenda: [...configuracao.diasDeVenda], formasDePagamento: [...configuracao.formasDePagamento] };
+    return paraConfiguracao(await this.api.chamar("put", "/configuracao", { corpo }));
   }
 }
 

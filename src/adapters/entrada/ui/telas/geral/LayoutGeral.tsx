@@ -5,15 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "../../componentes/cx";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
+import { NomeDoEstabelecimento } from "./Marca";
 
 const LINKS = [
   { href: "/dias", rotulo: "Dias de venda", curto: "Dias" },
   { href: "/produtos", rotulo: "Produtos", curto: "Produtos" },
   { href: "/clientes", rotulo: "Clientes", curto: "Clientes" },
   { href: "/pessoas", rotulo: "Pessoas", curto: "Pessoas" },
+  { href: "/configuracoes", rotulo: "Configurações", curto: "Ajustes" },
 ];
 
-/** Casca das telas de gestão, que não pertencem a um dia: dias, produtos e clientes. */
+/** Casca das telas de gestão, que não pertencem a um dia: dias, produtos, clientes, pessoas e configurações. */
 export function LayoutGeral({ children }: { children: ReactNode }) {
   const caminho = usePathname();
   const router = useRouter();
@@ -26,10 +28,10 @@ export function LayoutGeral({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* Celular: nome e Sair em cima, as três abas dividindo a largura embaixo. Tablet em diante: uma linha só. */}
+      {/* Celular: nome e Sair em cima, as abas dividindo a largura embaixo. Tablet em diante: uma linha só. */}
       <nav aria-label="Gestão" className="border-b border-line bg-surface-raised">
         <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto] items-center px-4 tablet:flex tablet:gap-1 tablet:px-6">
-          <span className="py-3 font-display text-titulo whitespace-nowrap tablet:mr-3">Expresso café</span>
+          <NomeDoEstabelecimento className="min-w-0 py-3 font-display text-titulo whitespace-nowrap tablet:mr-3" />
           <button
             type="button"
             onClick={sair}
@@ -37,7 +39,7 @@ export function LayoutGeral({ children }: { children: ReactNode }) {
           >
             Sair
           </button>
-          <div className="col-span-2 -mx-4 grid grid-cols-4 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
+          <div className="col-span-2 -mx-4 grid grid-cols-5 border-t border-line tablet:mx-0 tablet:flex tablet:border-t-0">
             {LINKS.map((link) => {
               const ativo = caminho === link.href || caminho.startsWith(`${link.href}/`);
               return (

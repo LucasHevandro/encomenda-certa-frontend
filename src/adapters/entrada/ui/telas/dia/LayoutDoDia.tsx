@@ -8,6 +8,7 @@ import { quantidadeDe } from "../../formatos";
 import { usePainel } from "../../hooks/consultas";
 import { useConexao } from "../../hooks/useConexao";
 import { useTempoReal } from "../../hooks/useTempoReal";
+import { NomeDoEstabelecimento } from "../geral/Marca";
 import { MenuMais } from "./MenuMais";
 
 function itemAtivo(caminho: string, base: string): ItemNavegacao {
@@ -75,6 +76,7 @@ export function LayoutDoDia({ diaId, children }: { diaId: string; children: Reac
         ativo={itemAtivo(caminho, base)}
         links={{ inicio: base, pedidos: `${base}/pedidos`, novo: `${base}/pedidos/novo`, producao: `${base}/producao` }}
         aoAbrirMais={() => setMenuAberto(true)}
+        titulo={<NomeDoEstabelecimento />}
       />
       <MenuMais diaId={diaId} aberto={menuAberto} aoFechar={() => setMenuAberto(false)} />
     </div>

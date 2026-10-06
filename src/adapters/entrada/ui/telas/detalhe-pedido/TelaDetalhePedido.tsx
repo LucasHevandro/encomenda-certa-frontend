@@ -21,7 +21,7 @@ import {
 import { mensagemDeErro } from "../../erros";
 import { dataCurta, dataHora, dinheiro, numeroPedido, quantidadeDe, telefone } from "../../formatos";
 import { useCancelarPedido, useMarcarRetirado, useReativarPedido, useRegistrarPagamento } from "../../hooks/acoes";
-import { usePainel, usePedido } from "../../hooks/consultas";
+import { useConfiguracao, usePainel, usePedido } from "../../hooks/consultas";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { useConexao } from "../../hooks/useConexao";
 
@@ -37,6 +37,7 @@ export function TelaDetalhePedido({ diaId, pedidoId }: { diaId: string; pedidoId
   const painel = usePainel(diaId);
   const online = useConexao();
   const { enviarConfirmacao } = useCasosDeUso();
+  const configuracao = useConfiguracao();
   const retirar = useMarcarRetirado(diaId);
   const pagar = useRegistrarPagamento(diaId);
   const cancelar = useCancelarPedido(diaId);
@@ -105,7 +106,7 @@ export function TelaDetalhePedido({ diaId, pedidoId }: { diaId: string; pedidoId
         <Secao titulo="Pagamento">
           <Filtros<Pagamento>
             rotulo="Forma de pagamento"
-            opcoes={PAGAMENTOS}
+            opcoes={PAGAMENTOS.filter((p) => p.id === "pendente" || p.id === pedido.pagamento || configuracao.formasDePagamento.includes(p.id))}
             ativo={pedido.pagamento}
             aoMudar={(pagamento) => podeMexer && pagar.mutate({ pedidoId: pedido.id, pagamento })}
           />
@@ -127,7 +128,7 @@ export function TelaDetalhePedido({ diaId, pedidoId }: { diaId: string; pedidoId
           </Botao>
         )}
         {pedido.retirada !== "cancelado" && dia && (
-          <Botao variante="secundario" bloco icone="mensagem" onClick={() => enviarConfirmacao.executar(pedido, dia)}>
+          <Botao variante="secundario" bloco icone="mensagem" onClick={() => enviarConfirmacao.executar(pedido, dia, configuracao)}>
             Enviar WhatsApp
           </Botao>
         )}

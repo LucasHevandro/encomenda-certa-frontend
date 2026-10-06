@@ -20,7 +20,9 @@ export function SeletorItens({
   quantidades,
   aoMudar,
   aoExceder,
+  limiteAtencao,
 }: {
+  limiteAtencao?: number;
   estoques: readonly EstoqueDoProduto[];
   precos: ReadonlyMap<string, Dinheiro>;
   quantidades: Readonly<Record<string, number>>;
@@ -33,7 +35,7 @@ export function SeletorItens({
         const maximo = disponiveis(estoque);
         const valor = quantidades[estoque.produtoId] ?? 0;
         const preco = precos.get(estoque.produtoId);
-        const estado = situacao(estoque);
+        const estado = situacao(estoque, limiteAtencao);
         return (
           <li
             key={estoque.produtoId}

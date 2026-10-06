@@ -156,6 +156,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/configuracao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configurações do estabelecimento */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Configuracao"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        /** Salvar configurações */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SalvarConfiguracao"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Configuracao"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usuarios": {
         parameters: {
             query?: never;
@@ -1402,6 +1480,19 @@ export interface components {
             novaProducao?: number;
             minimo?: number;
         };
+        Configuracao: {
+            nomeEstabelecimento: string;
+            /** @description #rrggbb */
+            corPrincipal: string;
+            logoUrl?: string;
+            enderecoRetirada?: string;
+            /** @description 0 = domingo … 6 = sábado */
+            diasDeVenda: number[];
+            limiteAtencao: number;
+            formasDePagamento: ("pix" | "dinheiro" | "cartao")[];
+            /** @description Campos: {cliente} {numero} {itens} {total} {data} {estabelecimento} {endereco} */
+            mensagemWhatsapp: string;
+        };
         Usuario: {
             id: string;
             nome: string;
@@ -1569,6 +1660,16 @@ export interface components {
         Entrar: {
             email: string;
             senha: string;
+        };
+        SalvarConfiguracao: {
+            nomeEstabelecimento: string;
+            corPrincipal: string;
+            logoUrl?: string;
+            enderecoRetirada?: string;
+            diasDeVenda: number[];
+            limiteAtencao: number;
+            formasDePagamento: ("pix" | "dinheiro" | "cartao")[];
+            mensagemWhatsapp: string;
         };
         NovoUsuario: {
             nome: string;
