@@ -74,6 +74,7 @@ export function TelaNovoPedido({
           setTelefone("");
           setNome("");
           setQuantidades({});
+          setExcesso(null);
           setNaEspera(null);
           criar.reset();
         }}
@@ -124,6 +125,7 @@ export function TelaNovoPedido({
       {
         onSuccess: (pedido) => {
           setCriado(pedido);
+          setExcesso(null);
           if (esperaId) {
             mudarEspera.mutate({ entradaId: esperaId, status: "atendido" });
             setEsperaId(undefined);

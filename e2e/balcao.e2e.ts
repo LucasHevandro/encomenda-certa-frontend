@@ -68,6 +68,20 @@ test("produto esgotado: avisa e coloca o cliente na lista de espera", async ({ p
   await expect(page.getByText("Bruno entrou na lista de espera: 1 pernil, 3º da fila.")).toBeVisible();
 });
 
+test("o aviso de esgotado não passa para o pedido seguinte", async ({ page }) => {
+  await entrar(page, `/dias/${DIA}/pedidos/novo`);
+  await page.getByLabel("Nome").fill("Carla");
+  await page.getByRole("button", { name: "Aumentar Frango assado" }).click();
+  await page.getByRole("button", { name: "Aumentar Pernil" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "Pernil esgotado" })).toBeVisible();
+  await page.getByRole("button", { name: "Confirmar reserva" }).click();
+
+  await expect(page.getByRole("heading", { name: "Reserva realizada!" })).toBeVisible();
+  await page.getByRole("button", { name: "Novo pedido" }).click();
+  await expect(page.getByLabel("Nome")).toHaveValue("");
+  await expect(page.getByRole("alert").filter({ hasText: "esgotado" })).toHaveCount(0);
+});
+
 test("cancelar libera as unidades e reativar devolve a reserva", async ({ page }) => {
   await entrar(page, `/dias/${DIA}/pedidos`);
   await page.getByRole("link", { name: /#0259/ }).click();
