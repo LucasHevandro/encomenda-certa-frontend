@@ -8,11 +8,7 @@ import { mensagemDeErro } from "../../erros";
 import { useCasosDeUso } from "../../hooks/useCasosDeUso";
 import { useConexao } from "../../hooks/useConexao";
 import { NomeDoEstabelecimento } from "../geral/Marca";
-
-/** Só aceita voltar para caminhos do próprio app. */
-function destinoSeguro(proximo: string | undefined): string {
-  return proximo && proximo.startsWith("/") && !proximo.startsWith("//") ? proximo : "/dias";
-}
+import { destinoSeguro } from "./destinoSeguro";
 
 /** Login por pessoa, com sessão longa para não pedir senha no meio do domingo. */
 /** Avisos de quem foi mandado de volta para o login. */
