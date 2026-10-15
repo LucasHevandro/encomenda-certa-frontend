@@ -6,7 +6,7 @@ import { Busca, CabecalhoDia, CartaoPedido, Carregando, FalhaAoCarregar, Filtros
 import { dataLonga, dinheiro, numeroPedido, quantidadeDe } from "../../formatos";
 import { usePainel, usePedidos } from "../../hooks/consultas";
 
-type Filtro = "todos" | Retirada;
+type Filtro = "todos" | Retirada | "online";
 
 const ORDEM: Record<Retirada, number> = { reservado: 0, retirado: 1, cancelado: 2 };
 
@@ -24,7 +24,8 @@ export function TelaPedidos({ diaId }: { diaId: string }) {
 
   const todos = pedidos.data ?? [];
   const contar = (r: Retirada) => todos.filter((p) => p.retirada === r).length;
-  const visiveis = ordenar(filtro === "todos" ? todos : todos.filter((p) => p.retirada === filtro));
+  const online = todos.filter((p) => p.origem === "online");
+  const visiveis = ordenar(filtro === "todos" ? todos : filtro === "online" ? online : todos.filter((p) => p.retirada === filtro));
 
   return (
     <Pagina>
@@ -47,6 +48,8 @@ export function TelaPedidos({ diaId }: { diaId: string }) {
           aoMudar={setFiltro}
           opcoes={[
             { id: "todos", rotulo: "Todos", contagem: todos.length },
+            // Só aparece quando há pedido feito pela página da loja.
+            ...(online.length > 0 ? [{ id: "online" as const, rotulo: "Online", contagem: online.length }] : []),
             { id: "reservado", rotulo: "Reservados", contagem: contar("reservado") },
             { id: "retirado", rotulo: "Retirados", contagem: contar("retirado") },
             { id: "cancelado", rotulo: "Cancelados", contagem: contar("cancelado") },
@@ -72,6 +75,7 @@ export function TelaPedidos({ diaId }: { diaId: string }) {
                 total={dinheiro(totalDoPedido(pedido))}
                 estado={pedido.retirada}
                 pagamento={pedido.retirada === "cancelado" ? undefined : estaPago(pedido) ? "pago" : "naoPago"}
+                online={pedido.origem === "online"}
               />
             </li>
           ))}

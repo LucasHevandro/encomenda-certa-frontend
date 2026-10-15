@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONFIGURACAO_PADRAO, descreverDias, preencherMensagem, validarConfiguracao } from "./Configuracao";
+import { CONFIGURACAO_PADRAO, descreverDias, encerramentoDoDia, preencherMensagem, sugerirEndereco, validarConfiguracao } from "./Configuracao";
 
 describe("Configuracao", () => {
   it("limpa e ordena o que veio da tela", () => {
@@ -26,6 +26,20 @@ describe("Configuracao", () => {
     expect(descreverDias([6, 0])).toBe("sábado ou domingo");
     expect(descreverDias([1, 2, 3, 4, 5])).toBe("segunda, terça, quarta, quinta ou sexta");
     expect(descreverDias([0])).toBe("domingo");
+  });
+
+  it("pedidos online: endereço obrigatório para ligar, só minúsculas, números e hífen", () => {
+    const online = (p: object) => validarConfiguracao({ ...CONFIGURACAO_PADRAO, pedidosOnline: { ...CONFIGURACAO_PADRAO.pedidosOnline, ...p } });
+    expect(online({ ativo: true, endereco: " Expresso-Cafe " }).pedidosOnline.endereco).toBe("expresso-cafe");
+    expect(() => online({ ativo: true })).toThrow("endereço da página");
+    expect(() => online({ endereco: "café bom" })).toThrow("letras minúsculas");
+    expect(() => online({ encerramentoMinutos: 15 })).toThrow("até quando");
+    expect(() => online({ maximoPorProduto: 100 })).toThrow("1 a 99");
+  });
+
+  it("sugere o endereço pelo nome e conta o prazo da meia-noite de Brasília", () => {
+    expect(sugerirEndereco("Expresso Café & Cia.")).toBe("expresso-cafe-cia");
+    expect(encerramentoDoDia("2026-10-18", -240).toISOString()).toBe("2026-10-17T23:00:00.000Z");
   });
 
   it("preenche a mensagem e tira a linha do endereço quando não há endereço", () => {

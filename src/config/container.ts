@@ -6,6 +6,7 @@ import {
   DiasHttp,
   EmpresasHttp,
   EsperaHttp,
+  LojaHttp,
   PedidosHttp,
   ProducaoHttp,
   ProdutosHttp,
@@ -40,6 +41,7 @@ import { ReativarPedido } from "@/core/application/casos-de-uso/pedidos/Reativar
 import { RegistrarPagamento } from "@/core/application/casos-de-uso/pedidos/RegistrarPagamento";
 import { SalvarProducao } from "@/core/application/casos-de-uso/producao/SalvarProducao";
 import { GerenciarProdutos } from "@/core/application/casos-de-uso/produtos/GerenciarProdutos";
+import { PaginaDaLoja } from "@/core/application/casos-de-uso/loja/PaginaDaLoja";
 
 /** Imita o cookie httpOnly que a API grava, para o proxy.ts deixar entrar também sem API. */
 function gravarCookieDeSessao(usuario: Usuario | null) {
@@ -79,6 +81,7 @@ function criarSaida() {
     usuarios: new UsuariosHttp(api),
     empresas: new EmpresasHttp(api),
     configuracao: new ConfiguracaoHttp(api),
+    loja: new LojaHttp(api),
     eventos: new EventosSSE(api.baseUrl),
   };
 }
@@ -117,6 +120,7 @@ export function criarContainer() {
       clientes: new BuscarClientes(saida.clientes),
       espera: new ListaDeEspera(saida.espera),
       produtos: new GerenciarProdutos(saida.produtos),
+      loja: new PaginaDaLoja(saida.loja),
     },
   };
 }

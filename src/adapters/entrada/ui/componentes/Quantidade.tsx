@@ -13,6 +13,8 @@ export interface QuantidadeProps {
   max?: number;
   /** Chamado ao tocar + no limite; a tela usa para abrir o aviso "Reservar N". */
   aoExceder?: (tentado: number) => void;
+  /** Frase ao tocar + no limite, quando o limite não é o disponível (ex.: máximo por pedido). */
+  avisoNoLimite?: string;
   className?: string;
 }
 
@@ -20,7 +22,7 @@ const BOTAO =
   "grid size-12 cursor-pointer place-items-center rounded-sm border-[1.5px] border-line-strong bg-surface-raised text-ink disabled:cursor-not-allowed disabled:opacity-40";
 
 /** Seletor − valor +. No limite, o + fica tracejado e explica o motivo em vez de somar. */
-export function Quantidade({ valor, aoMudar, rotulo = "quantidade", min = 0, max, aoExceder, className }: QuantidadeProps) {
+export function Quantidade({ valor, aoMudar, rotulo = "quantidade", min = 0, max, aoExceder, avisoNoLimite, className }: QuantidadeProps) {
   const [excedeu, setExcedeu] = useState(false);
   const noLimite = max != null && valor >= max;
 
@@ -61,7 +63,7 @@ export function Quantidade({ valor, aoMudar, rotulo = "quantidade", min = 0, max
       {excedeu && noLimite && (
         <p role="alert" className="m-0 flex items-center gap-1 text-rotulo text-critico">
           <Icone nome="alerta" tamanho={16} />
-          Não há quantidade suficiente. Disponível: {max}.
+          {avisoNoLimite ?? `Não há quantidade suficiente. Disponível: ${max}.`}
         </p>
       )}
     </div>

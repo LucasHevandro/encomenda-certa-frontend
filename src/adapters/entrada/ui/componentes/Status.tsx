@@ -13,7 +13,8 @@ export type Estado =
   | "pendente"
   | "espera"
   | "pago"
-  | "naoPago";
+  | "naoPago"
+  | "online";
 
 export const ESTADOS: Record<Estado, { tom: Tom; icone: NomeIcone; rotulo: string }> = {
   disponivel: { tom: "ok", icone: "check", rotulo: "Disponível" },
@@ -26,6 +27,7 @@ export const ESTADOS: Record<Estado, { tom: Tom; icone: NomeIcone; rotulo: strin
   espera: { tom: "info", icone: "espera", rotulo: "Lista de espera" },
   pago: { tom: "ok", icone: "moeda", rotulo: "Pago" },
   naoPago: { tom: "neutro", icone: "moeda", rotulo: "Não pago" },
+  online: { tom: "info", icone: "online", rotulo: "Online" },
 };
 
 /** Selo de estado: ícone + palavra, nunca só cor. */

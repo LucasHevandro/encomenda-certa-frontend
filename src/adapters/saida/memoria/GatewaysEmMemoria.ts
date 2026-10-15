@@ -10,7 +10,8 @@ import type { ProdutosGateway } from "@/core/application/portas/ProdutosGateway"
 import type { Empresa, EmpresasGateway, NovaEmpresa } from "@/core/application/portas/EmpresasGateway";
 import type { SessaoGateway, Usuario } from "@/core/application/portas/SessaoGateway";
 import type { ConfiguracaoGateway } from "@/core/application/portas/ConfiguracaoGateway";
-import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
+import { type Configuracao, encerramentoDoDia } from "@/core/domain/configuracao/Configuracao";
+import type { AcompanhamentoPedido, ClienteDaLoja, Loja, LojaGateway, ReservaDaLoja } from "@/core/application/portas/LojaGateway";
 import type { NovoUsuario, UsuariosGateway } from "@/core/application/portas/UsuariosGateway";
 import { centavos, type Dinheiro, somar } from "@/core/domain/compartilhado/Dinheiro";
 import { ErroDeDominio } from "@/core/domain/compartilhado/ErroDeDominio";
@@ -25,6 +26,8 @@ import type { BancoEmMemoria } from "./BancoEmMemoria";
 
 /** Quem aparece no registro dos pedidos feitos sem a API. */
 const QUEM = "Você";
+/** Como a API registra o que o próprio cliente fez pela página. */
+const CLIENTE_PELA_PAGINA = "o cliente, pela página";
 
 const naoEncontrado = (o_que: string) => new ErroDeDominio("nao-encontrado", `${o_que} não encontrado.`);
 
@@ -130,6 +133,7 @@ export class PedidosEmMemoria implements PedidosGateway {
     return this.banco.pedidos
       .filter((p) => p.diaId === diaId)
       .filter((p) => !filtro.retirada || p.retirada === filtro.retirada)
+      .filter((p) => !filtro.origem || p.origem === filtro.origem)
       .filter(
         (p) =>
           !busca ||
@@ -147,6 +151,11 @@ export class PedidosEmMemoria implements PedidosGateway {
 
   async criar(novo: NovoPedido): Promise<Pedido> {
     await this.banco.esperar();
+    return this.reservar(novo, "balcao");
+  }
+
+  /** Mesma regra para o balcão e para a página pública; muda só quem aparece no registro. */
+  reservar(novo: NovoPedido, origem: Pedido["origem"]): Pedido {
     diaParaEscrita(this.banco, novo.diaId);
     // Na API real esta checagem acontece dentro da transação, com a produção travada.
     verificarItens(this.banco.estoques(novo.diaId), novo.itens);
@@ -158,7 +167,8 @@ export class PedidosEmMemoria implements PedidosGateway {
       itens: this.montarItens(novo.itens),
       retirada: "reservado",
       pagamento: "pendente",
-      registro: { reservadoPor: QUEM, reservadoEm: new Date().toISOString() },
+      origem,
+      registro: { reservadoPor: origem === "online" ? CLIENTE_PELA_PAGINA : QUEM, reservadoEm: new Date().toISOString() },
     };
     this.banco.pedidos.push(pedido);
     this.lembrarCliente(pedido);
@@ -200,11 +210,11 @@ export class PedidosEmMemoria implements PedidosGateway {
     return this.substituir({ ...atual, pagamento });
   }
 
-  async cancelar(pedidoId: string): Promise<ResultadoCancelamento> {
+  async cancelar(pedidoId: string, quem = QUEM): Promise<ResultadoCancelamento> {
     await this.banco.esperar();
     const atual = this.buscarAberto(pedidoId);
     diaParaEscrita(this.banco, atual.diaId);
-    this.substituir({ ...atual, retirada: "cancelado", registro: { ...atual.registro, canceladoPor: QUEM, canceladoEm: new Date().toISOString() } });
+    this.substituir({ ...atual, retirada: "cancelado", registro: { ...atual.registro, canceladoPor: quem, canceladoEm: new Date().toISOString() } });
     const produtos = new Set(atual.itens.map((i) => i.produtoId));
     const clientesAguardando = this.banco.espera.filter(
       (e) => e.diaId === atual.diaId && e.status === "aguardando" && produtos.has(e.produtoId),
@@ -475,6 +485,137 @@ export class MensageiroEmMemoria implements Mensageiro {
 
   enviarConfirmacao(pedido: Pedido, dia: DiaVenda, configuracao: Configuracao): void {
     this.enviadas.push({ pedido, dia, configuracao });
+  }
+}
+
+/**
+ * Página pública sem a API: a loja é a configuração do banco falso, e o código do link
+ * aponta para o pedido. Mesmas regras da API: prazo, WhatsApp, máximo por produto.
+ */
+export class LojaEmMemoria implements LojaGateway {
+  /** Código secreto do link → id do pedido. */
+  private readonly codigos = new Map<string, string>();
+
+  constructor(
+    private readonly banco: BancoEmMemoria,
+    private readonly pedidos: PedidosEmMemoria,
+    private readonly espera: EsperaEmMemoria,
+  ) {}
+
+  async obter(endereco: string): Promise<Loja> {
+    await this.banco.esperar();
+    const c = this.entrar(endereco);
+    const online = c.pedidosOnline;
+    const ativos = new Map(this.banco.produtos.filter((p) => p.ativo).map((p) => [p.id, p]));
+    const dias = online.ativo ? this.banco.dias.filter((d) => diaAberto(d) && this.prazo(d.data) > new Date()) : [];
+    return {
+      nome: c.nomeEstabelecimento,
+      corPrincipal: c.corPrincipal,
+      logoUrl: c.logoUrl,
+      enderecoRetirada: c.enderecoRetirada,
+      aviso: online.aviso,
+      aceitandoPedidos: online.ativo,
+      maximoPorProduto: online.maximoPorProduto,
+      dias: [...dias]
+        .sort((a, b) => a.data.localeCompare(b.data))
+        .map((d) => ({
+          id: d.id,
+          data: d.data,
+          encerraEm: this.prazo(d.data).toISOString(),
+          produtos: this.banco
+            .estoques(d.id)
+            .filter((e) => ativos.has(e.produtoId))
+            .sort((a, b) => a.nome.localeCompare(b.nome))
+            .map((e) => ({ produtoId: e.produtoId, nome: e.nome, preco: ativos.get(e.produtoId)!.preco, disponiveis: disponiveis(e) })),
+        })),
+    };
+  }
+
+  async reservar(endereco: string, reserva: ReservaDaLoja): Promise<{ codigo: string; numero: number }> {
+    await this.banco.esperar();
+    if (reserva.site) throw new ErroDeDominio("dados-invalidos", "Pedido recusado.");
+    this.conferirPrazo(endereco, reserva.diaId);
+    this.conferirMaximo(reserva.itens.map((i) => i.quantidade));
+    const pedido = this.pedidos.reservar({ diaId: reserva.diaId, cliente: reserva.cliente, itens: reserva.itens }, "online");
+    const codigo = crypto.randomUUID().replaceAll("-", "");
+    this.codigos.set(codigo, pedido.id);
+    this.banco.emitir(pedido.diaId, { tipo: "pedido-online", numero: pedido.numero, cliente: pedido.cliente.nome });
+    return { codigo, numero: pedido.numero };
+  }
+
+  async entrarNaEspera(endereco: string, entrada: { diaId: string; produtoId: string; cliente: ClienteDaLoja; quantidade: number }): Promise<void> {
+    this.conferirPrazo(endereco, entrada.diaId);
+    this.conferirMaximo([entrada.quantidade]);
+    await this.espera.adicionar(entrada);
+  }
+
+  async acompanhar(codigo: string): Promise<AcompanhamentoPedido> {
+    await this.banco.esperar();
+    return this.paraAcompanhamento(this.pedidoDoCodigo(codigo));
+  }
+
+  async cancelar(codigo: string): Promise<AcompanhamentoPedido> {
+    const pedido = this.pedidoDoCodigo(codigo);
+    if (!this.podeCancelar(pedido)) {
+      throw new ErroDeDominio("cancelamento-encerrado", "O prazo para cancelar pela página acabou. Fale com a loja.");
+    }
+    await this.pedidos.cancelar(pedido.id, CLIENTE_PELA_PAGINA);
+    return this.paraAcompanhamento(this.pedidoDoCodigo(codigo));
+  }
+
+  private entrar(endereco: string): Configuracao {
+    const c = this.banco.configuracao;
+    if (!c.pedidosOnline.endereco || c.pedidosOnline.endereco !== endereco.trim().toLowerCase()) {
+      throw new ErroDeDominio("nao-encontrado", "Página não encontrada.");
+    }
+    return c;
+  }
+
+  private conferirPrazo(endereco: string, diaId: string) {
+    if (!this.entrar(endereco).pedidosOnline.ativo) {
+      throw new ErroDeDominio("pedidos-online-fechados", "Esta loja não está recebendo pedidos pelo site agora.");
+    }
+    const dia = this.banco.dias.find((d) => d.id === diaId);
+    if (!dia) throw naoEncontrado("Dia de venda");
+    if (!diaAberto(dia) || this.prazo(dia.data) <= new Date()) {
+      throw new ErroDeDominio("pedidos-online-encerrados", "Os pedidos pelo site para este dia já foram encerrados.");
+    }
+  }
+
+  private conferirMaximo(quantidades: readonly number[]) {
+    const maximo = this.banco.configuracao.pedidosOnline.maximoPorProduto;
+    if (quantidades.some((q) => q > maximo)) throw new ErroDeDominio("acima-do-maximo", `Cada pedido leva até ${maximo} unidades de cada produto.`);
+  }
+
+  private prazo(data: string): Date {
+    return encerramentoDoDia(data, this.banco.configuracao.pedidosOnline.encerramentoMinutos);
+  }
+
+  private pedidoDoCodigo(codigo: string): Pedido {
+    const pedido = this.banco.pedidos.find((p) => p.id === this.codigos.get(codigo));
+    if (!pedido) throw naoEncontrado("Pedido");
+    return pedido;
+  }
+
+  private podeCancelar(pedido: Pedido): boolean {
+    const dia = this.banco.dias.find((d) => d.id === pedido.diaId);
+    return pedido.retirada === "reservado" && !!dia && diaAberto(dia) && this.prazo(dia.data) > new Date();
+  }
+
+  private paraAcompanhamento(pedido: Pedido): AcompanhamentoPedido {
+    const c = this.banco.configuracao;
+    const data = this.banco.dias.find((d) => d.id === pedido.diaId)?.data ?? pedido.diaId;
+    return {
+      numero: pedido.numero,
+      cliente: pedido.cliente.nome,
+      itens: pedido.itens.map((i) => ({ nome: i.nome, quantidade: i.quantidade, precoUnitario: i.precoUnitario })),
+      total: totalDoPedido(pedido),
+      retirada: pedido.retirada,
+      data,
+      estabelecimento: { nome: c.nomeEstabelecimento, corPrincipal: c.corPrincipal, enderecoRetirada: c.enderecoRetirada, endereco: c.pedidosOnline.endereco },
+      cancelavelAte: this.prazo(data).toISOString(),
+      podeCancelar: this.podeCancelar(pedido),
+    };
   }
 }
 

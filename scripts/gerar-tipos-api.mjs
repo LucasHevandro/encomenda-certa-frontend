@@ -1,11 +1,11 @@
 // Gera src/adapters/saida/http/schema.d.ts a partir do openapi.json do backend.
-// Ordem: argumento (caminho ou URL) > ../expresso-cafe-backend/openapi.json > GitHub (branch master).
+// Ordem: argumento (caminho ou URL) > ../encomenda-certa-backend/openapi.json > GitHub (branch master).
 // Uso: pnpm api:tipos  |  pnpm api:tipos http://localhost:3333/openapi.json
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 
-const LOCAL = "../expresso-cafe-backend/openapi.json";
-const GITHUB = "https://raw.githubusercontent.com/LucasHevandro/expresso-cafe-backend/master/openapi.json";
+const LOCAL = "../encomenda-certa-backend/openapi.json";
+const GITHUB = "https://raw.githubusercontent.com/LucasHevandro/encomenda-certa-backend/master/openapi.json";
 const origem = process.argv[2] ?? (existsSync(LOCAL) ? LOCAL : GITHUB);
 
 console.log(`Gerando os tipos da API a partir de ${origem}`);

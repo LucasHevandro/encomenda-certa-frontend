@@ -6,12 +6,15 @@ import {
   CAMPOS_DA_MENSAGEM,
   CONFIGURACAO_PADRAO,
   type Configuracao,
+  ENCERRAMENTOS_ONLINE,
   type FormaDePagamento,
   FORMAS_DE_PAGAMENTO,
   NOMES_DOS_DIAS,
+  type PedidosOnline as PedidosOnlineDaLoja,
   preencherMensagem,
+  sugerirEndereco,
 } from "@/core/domain/configuracao/Configuracao";
-import { Aviso, Botao, Campo, Cartao, Carregando, FalhaAoCarregar, Icone, Pagina, Quantidade, Secao } from "../../componentes";
+import { Aviso, Botao, Campo, Cartao, Carregando, classesBotao, FalhaAoCarregar, Icone, Pagina, Quantidade, Secao } from "../../componentes";
 import { cx } from "../../componentes/cx";
 import { codigoDoErro, mensagemDeErro } from "../../erros";
 import { useSalvarConfiguracao } from "../../hooks/acoes";
@@ -126,6 +129,17 @@ function Formulario({ inicial }: { inicial: Configuracao }) {
         </Cartao>
       </Secao>
 
+      <Secao titulo="Pedidos online">
+        <PedidosOnline
+          valor={rascunho.pedidosOnline}
+          salvo={inicial.pedidosOnline}
+          nome={rascunho.nomeEstabelecimento}
+          aoMudar={(parcial) => mudar({ pedidosOnline: { ...rascunho.pedidosOnline, ...parcial } })}
+          erro={erroDe("config-endereco") ?? erroDe("endereco-em-uso")}
+          erroMaximo={erroDe("config-maximo")}
+        />
+      </Secao>
+
       <Secao titulo="Confirmação pelo WhatsApp">
         <Cartao className="flex flex-col gap-3">
           <Campo
@@ -148,8 +162,8 @@ function Formulario({ inicial }: { inicial: Configuracao }) {
         </Cartao>
       </Secao>
 
-      {salvar.isError && !codigo?.startsWith("config-") && <Aviso tom="critico">{mensagemDeErro(salvar.error)}</Aviso>}
-      {salvar.isError && codigo?.startsWith("config-") && <Aviso tom="critico">Confira o campo marcado acima.</Aviso>}
+      {salvar.isError && !codigo?.startsWith("config-") && codigo !== "endereco-em-uso" && <Aviso tom="critico">{mensagemDeErro(salvar.error)}</Aviso>}
+      {salvar.isError && (codigo?.startsWith("config-") || codigo === "endereco-em-uso") && <Aviso tom="critico">Confira o campo marcado acima.</Aviso>}
       {salva && (
         <Aviso tom="ok" titulo="Configurações salvas">
           Já valem para todos os aparelhos.
@@ -159,6 +173,124 @@ function Formulario({ inicial }: { inicial: Configuracao }) {
         {salvar.isPending ? "Salvando…" : "Salvar configurações"}
       </Botao>
     </form>
+  );
+}
+
+/** Página pública da loja: ligar, endereço, prazo, máximo por produto e aviso. */
+function PedidosOnline({
+  valor,
+  salvo,
+  nome,
+  aoMudar,
+  erro,
+  erroMaximo,
+}: {
+  valor: PedidosOnlineDaLoja;
+  /** O que já está valendo: o link só aparece depois de salvo. */
+  salvo: PedidosOnlineDaLoja;
+  nome: string;
+  aoMudar: (parcial: Partial<PedidosOnlineDaLoja>) => void;
+  erro?: string;
+  erroMaximo?: string;
+}) {
+  const idPrazo = useId();
+  const [copiado, setCopiado] = useState(false);
+  // O formulário só aparece depois de a configuração chegar, já no navegador.
+  const origem = typeof window === "undefined" ? "" : window.location.origin;
+  const sugestao = sugerirEndereco(nome);
+  const linkSalvo = salvo.ativo && salvo.endereco ? `${origem}/loja/${salvo.endereco}` : null;
+
+  async function copiar(link: string) {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiado(true);
+    } catch {
+      setCopiado(false);
+    }
+  }
+
+  return (
+    <Cartao className="flex flex-col gap-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col">
+          <span className="text-corpo-lg font-semibold">Receber pedidos pela página</span>
+          <span className="text-legenda text-ink-muted">Os clientes reservam pelo celular, do mesmo estoque do balcão.</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={valor.ativo}
+          aria-label="Receber pedidos pela página"
+          onClick={() => aoMudar({ ativo: !valor.ativo, ...(!valor.ativo && !valor.endereco && sugestao.length >= 3 && { endereco: sugestao }) })}
+          className={cx(
+            "flex h-9 w-15 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors",
+            valor.ativo ? "justify-end bg-ok" : "justify-start bg-line-strong",
+          )}
+        >
+          <span className="size-8 rounded-full bg-surface-raised shadow-cartao" />
+        </button>
+      </div>
+
+      <Campo
+        rotulo="Endereço da página"
+        value={valor.endereco ?? ""}
+        onChange={(e) => aoMudar({ endereco: e.target.value.toLowerCase() })}
+        autoCapitalize="none"
+        spellCheck={false}
+        maxLength={40}
+        placeholder={sugestao || "minha-loja"}
+        dica={`${origem || ""}/loja/${valor.endereco?.trim() || "…"} · letras minúsculas, números e hífen.`}
+        erro={erro}
+      />
+
+      {linkSalvo && (
+        <div className="flex flex-wrap gap-2">
+          <a href={linkSalvo} target="_blank" rel="noopener" className={classesBotao({ variante: "secundario", tamanho: "md" })}>
+            <Icone nome="online" tamanho={20} />
+            <span>Abrir a página</span>
+          </a>
+          <Botao variante="secundario" tamanho="md" icone="link" onClick={() => copiar(linkSalvo)}>
+            {copiado ? "Link copiado" : "Copiar link"}
+          </Botao>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={idPrazo} className="text-rotulo">
+          Receber pedidos até
+        </label>
+        <select
+          id={idPrazo}
+          value={valor.encerramentoMinutos}
+          onChange={(e) => aoMudar({ encerramentoMinutos: Number(e.target.value) })}
+          className="min-h-14 w-full rounded-md border-[1.5px] border-line-strong bg-surface-raised px-3 text-[17px] text-ink"
+        >
+          {ENCERRAMENTOS_ONLINE.map((e) => (
+            <option key={e.minutos} value={e.minutos}>
+              {e.rotulo}
+            </option>
+          ))}
+        </select>
+        <p className="m-0 text-legenda text-ink-muted">Conta a partir do dia de venda. O cliente também só cancela pela página até aqui.</p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col">
+          <span className="text-rotulo">Máximo de cada produto por pedido</span>
+          <span className="text-legenda text-ink-muted">Evita que um pedido leve tudo.</span>
+        </div>
+        <Quantidade rotulo="Máximo por produto" valor={valor.maximoPorProduto} min={1} max={99} aoMudar={(maximoPorProduto) => aoMudar({ maximoPorProduto })} />
+      </div>
+      {erroMaximo && <Aviso tom="critico">{erroMaximo}</Aviso>}
+
+      <Campo
+        rotulo="Aviso no topo da página (opcional)"
+        value={valor.aviso ?? ""}
+        onChange={(e) => aoMudar({ aviso: e.target.value })}
+        maxLength={200}
+        placeholder="Ex.: Retirada pela porta lateral."
+      />
+    </Cartao>
   );
 }
 

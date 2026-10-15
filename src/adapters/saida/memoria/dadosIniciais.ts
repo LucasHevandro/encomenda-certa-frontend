@@ -5,6 +5,10 @@ import { BancoEmMemoria } from "./BancoEmMemoria";
 
 /** Dados parecidos com os das telas, para desenvolver sem a API. */
 export function popularDadosIniciais(banco: BancoEmMemoria): void {
+  banco.configuracao = {
+    ...banco.configuracao,
+    pedidosOnline: { ativo: true, endereco: "expresso-cafe", encerramentoMinutos: -240, maximoPorProduto: 10 },
+  };
   banco.produtos = [
     { id: "frango", nome: "Frango assado", preco: centavos(5500), ativo: true },
     { id: "costela", nome: "Costela", preco: centavos(8990), ativo: true },
@@ -53,6 +57,7 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
     itens,
     retirada: "reservado",
     pagamento: "pendente",
+    origem: "balcao",
     ...extra,
   });
 
@@ -62,7 +67,11 @@ export function popularDadosIniciais(banco: BancoEmMemoria): void {
     pedido(256, "Carlos Souza", [item("frango", 2), item("pernil", 1)], { pagamento: "pix" }),
     pedido(257, "Maria Oliveira", [item("frango", 1)], { retirada: "retirado", pagamento: "dinheiro" }),
     pedido(258, "João da Silva", [item("frango", 2), item("costela", 1)]),
-    pedido(259, "Lúcia Ramos", [item("pernil", 9), item("maionese", 4)]),
+    pedido(259, "Lúcia Ramos", [item("pernil", 9), item("maionese", 4)], {
+      origem: "online",
+      cliente: { nome: "Lúcia Ramos", telefone: "44955554444" },
+      registro: { reservadoPor: "o cliente, pela página", reservadoEm: "2026-10-03T19:12:00.000Z" },
+    }),
   ];
 
   // Domingos anteriores, já fechados: pedidos variados e o fechamento calculado a partir deles.

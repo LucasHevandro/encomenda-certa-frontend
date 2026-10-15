@@ -76,6 +76,7 @@ export function TelaDetalhePedido({ diaId, pedidoId }: { diaId: string; pedidoId
       <div className="flex flex-wrap gap-2">
         <Status estado={pedido.retirada} grande />
         {pedido.retirada !== "cancelado" && <Status estado={estaPago(pedido) ? "pago" : "naoPago"} grande />}
+        {pedido.origem === "online" && <Status estado="online" grande>Pedido online</Status>}
       </div>
 
       <Cartao className="flex flex-col gap-3">
@@ -193,7 +194,9 @@ export function TelaDetalhePedido({ diaId, pedidoId }: { diaId: string; pedidoId
 function linhasDoRegistro(pedido: Pedido): string[] {
   const r = pedido.registro;
   if (!r) return [];
+  // A API registra "o cliente, pela página" quando foi o próprio cliente, no link do pedido.
+  const porQuem = (quem: string) => (quem === "o cliente, pela página" ? " pelo cliente, na página" : ` por ${quem}`);
   const linha = (verbo: string, quem?: string, em?: string) =>
-    quem || em ? [`${verbo}${quem ? ` por ${quem}` : ""}${em ? ` · ${dataHora(em)}` : ""}`] : [];
+    quem || em ? [`${verbo}${quem ? porQuem(quem) : ""}${em ? ` · ${dataHora(em)}` : ""}`] : [];
   return [...linha("Reservado", r.reservadoPor, r.reservadoEm), ...linha("Retirado", r.retiradoPor, r.retiradoEm), ...linha("Cancelado", r.canceladoPor, r.canceladoEm)];
 }

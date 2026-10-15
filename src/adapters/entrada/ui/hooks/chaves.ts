@@ -19,4 +19,7 @@ export const chaves = {
   clientes: () => ["clientes"] as const,
   cliente: (clienteId: string) => ["clientes", "historico", clienteId] as const,
   clientePorTelefone: (digitos: string) => ["clientes", "telefone", digitos] as const,
+  /** Página pública: a vitrine de uma loja e um pedido visto pelo link do cliente. */
+  loja: (endereco: string) => ["loja", endereco] as const,
+  acompanhamento: (codigo: string) => ["acompanhamento", codigo] as const,
 };

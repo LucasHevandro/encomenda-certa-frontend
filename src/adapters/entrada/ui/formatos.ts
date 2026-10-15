@@ -118,6 +118,14 @@ export function plural(nome: string): string {
     .join(" ");
 }
 
+/** "sábado, 17/10, às 20h" (ou "às 20h30"), para os prazos da página da loja. */
+export function prazo(iso: string): string {
+  const data = new Date(iso);
+  const doisDigitos = (n: number) => String(n).padStart(2, "0");
+  const horas = `${data.getHours()}h${data.getMinutes() ? doisDigitos(data.getMinutes()) : ""}`;
+  return `${DIAS_SEMANA[data.getDay()].toLowerCase()}, ${doisDigitos(data.getDate())}/${doisDigitos(data.getMonth() + 1)}, às ${horas}`;
+}
+
 /** "(44) 99999-9999". */
 export function telefone(digitos: string | undefined): string {
   if (!digitos) return "";

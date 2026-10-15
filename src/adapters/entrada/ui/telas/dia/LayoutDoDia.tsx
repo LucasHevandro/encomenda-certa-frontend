@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, useCallback, useState } from "react";
 import type { EventoDoDia } from "@/core/application/portas/EventosTempoReal";
 import { Aviso, BarraNavegacao, Botao, type ItemNavegacao, LinkBotao } from "../../componentes";
-import { quantidadeDe } from "../../formatos";
+import { numeroPedido, quantidadeDe } from "../../formatos";
 import { usePainel } from "../../hooks/consultas";
 import { useConexao } from "../../hooks/useConexao";
 import { useTempoReal } from "../../hooks/useTempoReal";
@@ -27,9 +27,12 @@ export function LayoutDoDia({ diaId, children }: { diaId: string; children: Reac
   const [menuAberto, setMenuAberto] = useState(false);
   /** produtoId → unidades liberadas desde o último "Fechar". Um cancelamento pode liberar vários produtos. */
   const [liberadas, setLiberadas] = useState<Record<string, number>>({});
+  /** Pedidos que clientes fizeram pela página desde o último "Fechar". */
+  const [novosOnline, setNovosOnline] = useState<{ numero: number; cliente: string }[]>([]);
   const { data: painel } = usePainel(diaId);
 
   const aoReceber = useCallback((evento: EventoDoDia) => {
+    if (evento.tipo === "pedido-online") setNovosOnline((atual) => [...atual, { numero: evento.numero, cliente: evento.cliente }]);
     if (evento.tipo !== "unidades-liberadas") return;
     setLiberadas((atual) => ({ ...atual, [evento.produtoId]: (atual[evento.produtoId] ?? 0) + evento.quantidade }));
   }, []);
@@ -46,6 +49,27 @@ export function LayoutDoDia({ diaId, children }: { diaId: string; children: Reac
       {!online && (
         <div role="alert" className="sticky top-0 z-30 bg-critico px-4 py-2 text-center text-rotulo text-on-brasa">
           Sem conexão. Reservas e alterações ficam travadas até a internet voltar.
+        </div>
+      )}
+      {novosOnline.length > 0 && (
+        <div className="mx-auto w-full max-w-coluna px-4 pt-4 tablet:max-w-2xl tablet:px-6">
+          <Aviso
+            tom="info"
+            icone="online"
+            titulo={novosOnline.length === 1 ? `Novo pedido online ${numeroPedido(novosOnline[0].numero)}` : `${novosOnline.length} pedidos online novos`}
+            acoes={
+              <>
+                <LinkBotao href={`${base}/pedidos`} tamanho="md" onClick={() => setNovosOnline([])}>
+                  Ver pedidos
+                </LinkBotao>
+                <Botao variante="fantasma" tamanho="md" onClick={() => setNovosOnline([])}>
+                  Fechar
+                </Botao>
+              </>
+            }
+          >
+            {novosOnline.map((p) => `${numeroPedido(p.numero)} ${p.cliente}`).join(", ")} {novosOnline.length === 1 ? "reservou" : "reservaram"} pela página da loja.
+          </Aviso>
         </div>
       )}
       {totalLiberado > 0 && (

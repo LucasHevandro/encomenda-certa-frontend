@@ -1,4 +1,5 @@
 import type { ConfiguracaoGateway } from "@/core/application/portas/ConfiguracaoGateway";
+import type { AcompanhamentoPedido, ClienteDaLoja, Loja, LojaGateway, ReservaDaLoja } from "@/core/application/portas/LojaGateway";
 import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { ClienteEncontrado, ClientesGateway } from "@/core/application/portas/ClientesGateway";
 import type { AbrirDia, DiasGateway, PainelDoDia, ResumoDia, SugestaoProducao } from "@/core/application/portas/DiasGateway";
@@ -18,7 +19,7 @@ import type { EntradaEspera } from "@/core/domain/lista-espera/EntradaEspera";
 import type { Pagamento, Pedido } from "@/core/domain/pedido/Pedido";
 import type { Produto } from "@/core/domain/produto/Produto";
 import type { ApiTipada } from "./apiTipada";
-import { dinheiro, paraConfiguracao, paraPedido, paraProduto } from "./mapeadores";
+import { dinheiro, paraAcompanhamento, paraConfiguracao, paraPedido, paraProduto } from "./mapeadores";
 
 /**
  * Implementações das portas com a API. As rotas e os formatos vêm do openapi.json do
@@ -60,7 +61,10 @@ export class PedidosHttp implements PedidosGateway {
   constructor(private readonly api: ApiTipada) {}
 
   async listar(diaId: string, filtro: FiltroPedidos = {}): Promise<Pedido[]> {
-    const pedidos = await this.api.chamar("get", "/dias/{id}/pedidos", { id: diaId, query: { retirada: filtro.retirada, busca: filtro.busca } });
+    const pedidos = await this.api.chamar("get", "/dias/{id}/pedidos", {
+      id: diaId,
+      query: { retirada: filtro.retirada, origem: filtro.origem, busca: filtro.busca },
+    });
     return pedidos.map(paraPedido);
   }
 
@@ -210,6 +214,34 @@ export class SessaoHttp implements SessaoGateway {
     } catch {
       return null;
     }
+  }
+}
+
+/** Página pública: sem login, a loja vem do endereço e o pedido do código secreto do link. */
+export class LojaHttp implements LojaGateway {
+  constructor(private readonly api: ApiTipada) {}
+
+  async obter(endereco: string): Promise<Loja> {
+    const loja = await this.api.chamar("get", "/publico/lojas/{id}", { id: endereco });
+    return { ...loja, dias: loja.dias.map((d) => ({ ...d, produtos: d.produtos.map((p) => ({ ...p, preco: dinheiro(p.preco) })) })) };
+  }
+
+  /** 409 vira QuantidadeIndisponivel { maximo } em erros.ts. */
+  reservar(endereco: string, reserva: ReservaDaLoja): Promise<{ codigo: string; numero: number }> {
+    const corpo = { diaId: reserva.diaId, cliente: reserva.cliente, itens: [...reserva.itens], ...(reserva.site && { site: reserva.site }) };
+    return this.api.chamar("post", "/publico/lojas/{id}/pedidos", { id: endereco, corpo });
+  }
+
+  async entrarNaEspera(endereco: string, entrada: { diaId: string; produtoId: string; cliente: ClienteDaLoja; quantidade: number }): Promise<void> {
+    await this.api.chamar("post", "/publico/lojas/{id}/espera", { id: endereco, corpo: entrada });
+  }
+
+  async acompanhar(codigo: string): Promise<AcompanhamentoPedido> {
+    return paraAcompanhamento(await this.api.chamar("get", "/publico/pedidos/{id}", { id: codigo }));
+  }
+
+  async cancelar(codigo: string): Promise<AcompanhamentoPedido> {
+    return paraAcompanhamento(await this.api.chamar("post", "/publico/pedidos/{id}/cancelamento", { id: codigo }));
   }
 }
 

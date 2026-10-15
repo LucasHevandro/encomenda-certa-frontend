@@ -1,5 +1,5 @@
 import type { ItemSolicitado } from "../../domain/disponibilidade/Disponibilidade";
-import type { ClienteDoPedido, Pagamento, Pedido, Retirada } from "../../domain/pedido/Pedido";
+import type { ClienteDoPedido, Origem, Pagamento, Pedido, Retirada } from "../../domain/pedido/Pedido";
 
 export interface NovoPedido {
   readonly diaId: string;
@@ -9,6 +9,7 @@ export interface NovoPedido {
 
 export interface FiltroPedidos {
   readonly retirada?: Retirada;
+  readonly origem?: Origem;
   /** Nome, telefone ou número do pedido. */
   readonly busca?: string;
 }

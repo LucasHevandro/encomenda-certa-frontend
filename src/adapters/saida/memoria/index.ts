@@ -8,6 +8,7 @@ import {
   EmpresasEmMemoria,
   EsperaEmMemoria,
   EventosEmMemoria,
+  LojaEmMemoria,
   MensageiroEmMemoria,
   PedidosEmMemoria,
   ProducaoEmMemoria,
@@ -24,14 +25,17 @@ export function criarAdaptadoresEmMemoria({
 }: { atrasoMs?: number; comDados?: boolean; aoMudarSessao?: (usuario: Usuario | null) => void } = {}) {
   const banco = new BancoEmMemoria(atrasoMs);
   if (comDados) popularDadosIniciais(banco);
+  const pedidos = new PedidosEmMemoria(banco);
+  const espera = new EsperaEmMemoria(banco);
   return {
     banco,
     dias: new DiasEmMemoria(banco),
-    pedidos: new PedidosEmMemoria(banco),
+    pedidos,
     producao: new ProducaoEmMemoria(banco),
     clientes: new ClientesEmMemoria(banco),
     produtos: new ProdutosEmMemoria(banco),
-    espera: new EsperaEmMemoria(banco),
+    espera,
+    loja: new LojaEmMemoria(banco, pedidos, espera),
     sessao: new SessaoEmMemoria(banco, aoMudarSessao),
     usuarios: new UsuariosEmMemoria(banco),
     empresas: new EmpresasEmMemoria(banco),

@@ -588,6 +588,8 @@ export interface paths {
                 query?: {
                     /** @description reservado | retirado | cancelado */
                     retirada?: string;
+                    /** @description balcao | online */
+                    origem?: string;
                     /** @description Nome, telefone ou número */
                     busca?: string;
                 };
@@ -878,7 +880,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Tempo real (text/event-stream): disponibilidade-mudou, unidades-liberadas */
+        /** Tempo real (text/event-stream): disponibilidade-mudou, unidades-liberadas, pedido-online */
         get: {
             parameters: {
                 query?: never;
@@ -910,6 +912,249 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/lojas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Página pública da loja ({id} = endereço da página) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Loja"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/lojas/{id}/pedidos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reserva feita pelo cliente (409 com o máximo se não couber) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PedidoOnline"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PedidoReservado"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/lojas/{id}/espera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cliente entra na lista de espera pela página */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EsperaOnline"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EntradaEspera"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/pedidos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pedido visto pelo link do cliente ({id} = código) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AcompanhamentoPedido"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/publico/pedidos/{id}/cancelamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cliente cancela pelo link, até o prazo */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AcompanhamentoPedido"];
+                    };
+                };
+                /** @description Erro com a mensagem para o balcão */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1621,6 +1866,67 @@ export interface components {
             formasDePagamento: ("pix" | "dinheiro" | "cartao")[];
             /** @description Campos: {cliente} {numero} {itens} {total} {data} {estabelecimento} {endereco} */
             mensagemWhatsapp: string;
+            pedidosOnline: {
+                ativo: boolean;
+                /** @description Endereço da página: /loja/{endereco} */
+                endereco?: string;
+                /** @description Prazo para pedir e cancelar, em minutos a partir da meia-noite do dia (-240 = véspera às 20h) */
+                encerramentoMinutos: number;
+                maximoPorProduto: number;
+                aviso?: string;
+            };
+        };
+        Loja: {
+            nome: string;
+            corPrincipal: string;
+            logoUrl?: string;
+            enderecoRetirada?: string;
+            aviso?: string;
+            aceitandoPedidos: boolean;
+            maximoPorProduto: number;
+            dias: {
+                id: string;
+                /** @description Data do dia de venda, ex.: 2026-10-04 */
+                data: string;
+                /** @description Até quando dá para pedir e cancelar (ISO) */
+                encerraEm: string;
+                produtos: {
+                    produtoId: string;
+                    nome: string;
+                    /** @description Valor em centavos (R$ 55,00 = 5500) */
+                    preco: number;
+                    disponiveis: number;
+                }[];
+            }[];
+        };
+        PedidoReservado: {
+            /** @description Código secreto do link de acompanhamento */
+            codigo: string;
+            numero: number;
+        };
+        AcompanhamentoPedido: {
+            numero: number;
+            cliente: string;
+            itens: {
+                nome: string;
+                quantidade: number;
+                /** @description Valor em centavos (R$ 55,00 = 5500) */
+                precoUnitario: number;
+            }[];
+            /** @description Valor em centavos (R$ 55,00 = 5500) */
+            total: number;
+            /** @enum {string} */
+            retirada: "reservado" | "retirado" | "cancelado";
+            /** @description Data do dia de venda, ex.: 2026-10-04 */
+            data: string;
+            estabelecimento: {
+                nome: string;
+                corPrincipal: string;
+                enderecoRetirada?: string;
+                endereco?: string;
+            };
+            cancelavelAte: string;
+            podeCancelar: boolean;
         };
         Usuario: {
             id: string;
@@ -1692,6 +1998,11 @@ export interface components {
             retirada: "reservado" | "retirado" | "cancelado";
             /** @enum {string} */
             pagamento: "pendente" | "pix" | "dinheiro" | "cartao";
+            /**
+             * @description Online: o próprio cliente reservou pela página
+             * @enum {string}
+             */
+            origem: "balcao" | "online";
             registro?: components["schemas"]["RegistroDoPedido"];
         };
         ResultadoCancelamento: {
@@ -1765,6 +2076,11 @@ export interface components {
                 retirada: "reservado" | "retirado" | "cancelado";
                 /** @enum {string} */
                 pagamento: "pendente" | "pix" | "dinheiro" | "cartao";
+                /**
+                 * @description Online: o próprio cliente reservou pela página
+                 * @enum {string}
+                 */
+                origem: "balcao" | "online";
                 registro?: components["schemas"]["RegistroDoPedido"];
                 /** @description Data do dia de venda, ex.: 2026-10-04 */
                 data: string;
@@ -1813,6 +2129,13 @@ export interface components {
             limiteAtencao: number;
             formasDePagamento: ("pix" | "dinheiro" | "cartao")[];
             mensagemWhatsapp: string;
+            pedidosOnline?: {
+                ativo: boolean;
+                endereco?: string;
+                encerramentoMinutos: number;
+                maximoPorProduto: number;
+                aviso?: string;
+            };
         };
         NovoUsuario: {
             nome: string;
@@ -1886,6 +2209,28 @@ export interface components {
         };
         MudarEmpresa: {
             ativa: boolean;
+        };
+        PedidoOnline: {
+            diaId: string;
+            cliente: {
+                nome: string;
+                telefone: string;
+            };
+            itens: {
+                produtoId: string;
+                quantidade: number;
+            }[];
+            site?: string;
+        };
+        EsperaOnline: {
+            diaId: string;
+            produtoId: string;
+            cliente: {
+                nome: string;
+                telefone: string;
+            };
+            quantidade: number;
+            site?: string;
         };
     };
     responses: never;

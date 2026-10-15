@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { CONFIGURACAO_PADRAO } from "@/core/domain/configuracao/Configuracao";
 import { useConfiguracao } from "../../hooks/consultas";
@@ -25,14 +26,27 @@ export function textoSobre(hex: string): string {
  */
 export function AplicarMarca() {
   const { corPrincipal, nomeEstabelecimento } = useConfiguracao();
+  // A página pública mostra a marca da loja visitada, não a de quem estiver logado.
+  const paginaPublica = ehPaginaPublica(usePathname());
 
   useEffect(() => {
-    if (nomeEstabelecimento && !document.title.includes(nomeEstabelecimento)) {
+    if (!paginaPublica && nomeEstabelecimento && !document.title.includes(nomeEstabelecimento)) {
       document.title = nomeEstabelecimento;
     }
-  }, [nomeEstabelecimento]);
+  }, [nomeEstabelecimento, paginaPublica]);
 
-  if (corPrincipal === CONFIGURACAO_PADRAO.corPrincipal) return null;
+  if (paginaPublica) return null;
+  return <EstiloDaMarca cor={corPrincipal} />;
+}
+
+/** Rotas abertas aos clientes, com a marca da loja e não a do estabelecimento logado. */
+export function ehPaginaPublica(caminho: string | null): boolean {
+  return !!caminho && (caminho.startsWith("/loja/") || caminho.startsWith("/pedido/"));
+}
+
+/** Troca a cor de destaque do app pela cor da marca. */
+export function EstiloDaMarca({ cor: corPrincipal }: { cor: string }) {
+  if (corPrincipal === CONFIGURACAO_PADRAO.corPrincipal || !/^#[0-9a-f]{6}$/i.test(corPrincipal)) return null;
   const claro = `
     --brasa: ${corPrincipal};
     --brasa-hover: color-mix(in oklab, ${corPrincipal} 82%, black);

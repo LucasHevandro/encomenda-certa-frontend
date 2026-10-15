@@ -11,11 +11,13 @@ export interface CartaoPedidoProps {
   total: string;
   estado: "reservado" | "retirado" | "cancelado" | "pendente";
   pagamento?: "pago" | "naoPago";
+  /** Feito pelo próprio cliente, na página da loja. */
+  online?: boolean;
   href: string;
 }
 
 /** Uma linha do caderno. O cartão inteiro abre o detalhe; nada de botões dentro. */
-export function CartaoPedido({ numero, cliente, itens, total, estado, pagamento, href }: CartaoPedidoProps) {
+export function CartaoPedido({ numero, cliente, itens, total, estado, pagamento, online, href }: CartaoPedidoProps) {
   const cancelado = estado === "cancelado";
   return (
     <Link
@@ -34,6 +36,7 @@ export function CartaoPedido({ numero, cliente, itens, total, estado, pagamento,
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className={cx("text-[17px] font-bold tabular-nums", cancelado && "text-ink-muted line-through")}>{total}</span>
         <span className="inline-flex flex-wrap gap-2">
+          {online && <Status estado="online" />}
           {pagamento && <Status estado={pagamento} />}
           <Status estado={estado} />
         </span>

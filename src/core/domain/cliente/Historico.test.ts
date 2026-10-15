@@ -11,6 +11,7 @@ const pedido = (retirada: Pedido["retirada"], itens: [string, number][]): Pedido
   itens: itens.map(([nome, quantidade]) => ({ produtoId: nome, nome, quantidade, precoUnitario: centavos(1000) })),
   retirada,
   pagamento: "pendente",
+  origem: "balcao",
 });
 
 describe("resumirHistorico", () => {

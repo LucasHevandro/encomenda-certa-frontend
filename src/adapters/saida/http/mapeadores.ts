@@ -1,3 +1,4 @@
+import type { AcompanhamentoPedido } from "@/core/application/portas/LojaGateway";
 import { centavos, type Dinheiro } from "@/core/domain/compartilhado/Dinheiro";
 import type { Configuracao } from "@/core/domain/configuracao/Configuracao";
 import type { Pedido } from "@/core/domain/pedido/Pedido";
@@ -21,4 +22,8 @@ export function paraConfiguracao(api: Esquema<"Configuracao">): Configuracao {
 
 export function paraProduto(api: Esquema<"Produto">): Produto {
   return { ...api, preco: dinheiro(api.preco) };
+}
+
+export function paraAcompanhamento(api: Esquema<"AcompanhamentoPedido">): AcompanhamentoPedido {
+  return { ...api, total: dinheiro(api.total), itens: api.itens.map((i) => ({ ...i, precoUnitario: dinheiro(i.precoUnitario) })) };
 }

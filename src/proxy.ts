@@ -10,7 +10,8 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   // /entrar fica sempre aberta: um cookie vencido não pode prender a pessoa num redirecionamento.
-  if (pathname === ROTA_ENTRAR) return NextResponse.next();
+  // A página da loja e o link do pedido são dos clientes, que não têm login.
+  if (pathname === ROTA_ENTRAR || pathname.startsWith("/loja/") || pathname.startsWith("/pedido/")) return NextResponse.next();
   if (!logado) {
     const destino = new URL(ROTA_ENTRAR, request.url);
     if (pathname !== "/") destino.searchParams.set("proximo", `${pathname}${search}`);

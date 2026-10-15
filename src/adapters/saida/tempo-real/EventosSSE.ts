@@ -31,6 +31,15 @@ export class EventosSSE implements EventosTempoReal {
       }
     });
 
+    fonte.addEventListener("pedido-online", (mensagem) => {
+      try {
+        const dados = JSON.parse((mensagem as MessageEvent<string>).data) as { numero: number; cliente: string };
+        aoReceber({ tipo: "pedido-online", numero: dados.numero, cliente: dados.cliente });
+      } catch {
+        aoReceber({ tipo: "disponibilidade-mudou" });
+      }
+    });
+
     return () => fonte.close();
   }
 }

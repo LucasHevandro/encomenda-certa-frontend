@@ -12,6 +12,7 @@ const pedido: Pedido = {
   itens: [{ produtoId: "frango", nome: "Frango assado", quantidade: 2, precoUnitario: centavos(5500) }],
   retirada: "reservado",
   pagamento: "pendente",
+  origem: "balcao",
 };
 const dia = { id: "2026-10-04", data: "2026-10-04", status: "aberto" as const };
 
